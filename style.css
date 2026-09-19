@@ -1,0 +1,783 @@
+/* =========================
+   RESET
+========================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: #f5f6f8;
+
+    color: #1f2937;
+}
+
+
+/* =========================
+   MAIN APP
+========================= */
+
+.planner {
+    width: 90%;
+
+    max-width: 900px;
+
+    margin: 50px auto;
+
+    background: white;
+
+    padding: 35px;
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 10px 30px
+        rgba(0, 0, 0, 0.08);
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.planner-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 40px;
+}
+
+
+.header-left h1 {
+    font-size: 30px;
+
+    margin-bottom: 6px;
+}
+
+
+#current-date {
+    color: #6b7280;
+
+    font-size: 15px;
+}
+
+
+/* =========================
+   NEW ENTRY BUTTON
+========================= */
+
+#new-entry-button {
+    border: none;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    padding: 12px 20px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+#new-entry-button:hover {
+    background: #1d4ed8;
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* =========================
+   SUMMARY
+========================= */
+
+.summary {
+    display: flex;
+
+    gap: 20px;
+
+    margin-bottom: 40px;
+}
+
+
+.summary-text {
+    flex: 1;
+
+    background: #f8fafc;
+
+    padding: 18px 20px;
+
+    border-radius: 12px;
+
+    font-size: 16px;
+
+    border:
+        1px solid
+        #e5e7eb;
+}
+
+
+.summary-text span {
+    font-weight: bold;
+
+    font-size: 19px;
+}
+
+
+/* =========================
+   DUE
+========================= */
+
+.due-section h2 {
+    font-size: 22px;
+
+    margin-bottom: 18px;
+}
+
+
+#entry-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 14px;
+}
+
+
+/* =========================
+   TODAY + TOMORROW
+========================= */
+
+#due-soon-section {
+    margin-bottom: 28px;
+
+    padding: 18px;
+
+    border-radius: 16px;
+
+    background: #fff7ed;
+
+    border:
+        1px solid
+        #fed7aa;
+}
+
+
+.due-soon-header {
+    margin-bottom: 14px;
+}
+
+
+.due-soon-header p {
+    font-size: 15px;
+
+    font-weight: 700;
+
+    color: #9a3412;
+}
+
+
+#due-soon-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+
+.due-soon-entry {
+    background: white;
+
+    border-color: #fdba74;
+
+    box-shadow:
+        0 4px 12px
+        rgba(249, 115, 22, 0.08);
+}
+
+
+.due-soon-entry .days-until {
+    color: #ea580c;
+
+    font-weight: 700;
+}
+
+
+/* =========================
+   UPCOMING
+========================= */
+
+.upcoming-header {
+    color: #6b7280;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.6px;
+
+    margin-bottom: 12px;
+}
+
+
+/* =========================
+   ENTRY
+========================= */
+
+.entry {
+    display: flex;
+
+    align-items: center;
+
+    gap: 25px;
+
+    background: #ffffff;
+
+    border:
+        1px solid
+        #e5e7eb;
+
+    border-left:
+        6px solid
+        var(--subject-color);
+
+    padding: 18px 20px;
+
+    border-radius: 14px;
+
+    transition: 0.2s;
+}
+
+
+.entry:hover {
+    box-shadow:
+        0 5px 15px
+        rgba(0, 0, 0, 0.06);
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* =========================
+   CHECKBOX
+========================= */
+
+.complete-checkbox {
+    width: 20px;
+
+    height: 20px;
+
+    flex-shrink: 0;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   DATE
+========================= */
+
+.entry-date {
+    min-width: 130px;
+}
+
+
+.days-until {
+    font-weight: 600;
+
+    font-size: 15px;
+
+    color: #374151;
+}
+
+
+.actual-date {
+    margin-top: 4px;
+
+    font-size: 13px;
+
+    color: #9ca3af;
+}
+
+
+/* =========================
+   ENTRY INFO
+========================= */
+
+.entry-info {
+    flex: 1;
+}
+
+
+.subject-row {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 5px;
+}
+
+
+.subject-icon {
+    width: 20px;
+
+    height: 20px;
+
+    object-fit: contain;
+
+    flex-shrink: 0;
+}
+
+
+.entry-subject {
+    font-size: 13px;
+
+    color:
+        var(--subject-color);
+
+    font-weight: 600;
+
+    margin-bottom: 0;
+}
+
+
+.entry-name {
+    font-size: 18px;
+
+    font-weight: 600;
+}
+
+
+/* =========================
+   EXAMS
+========================= */
+
+.entry.exam {
+    background: #fffaf5;
+}
+
+
+.entry-type {
+    background: #ea580c;
+
+    color: white;
+
+    padding: 6px 10px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+
+    font-weight: bold;
+}
+
+
+.exam-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.remove-exam-button {
+    width: 22px;
+
+    height: 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: #f3f4f6;
+
+    color: #6b7280;
+
+    font-size: 16px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition: 0.15s;
+}
+
+
+.remove-exam-button:hover {
+    background: #fee2e2;
+
+    color: #dc2626;
+}
+
+
+/* =========================
+   COMPLETED
+========================= */
+
+.completed-section {
+    margin-top: 40px;
+}
+
+
+.completed-section h2 {
+    font-size: 22px;
+
+    margin-bottom: 18px;
+}
+
+
+#completed-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 14px;
+}
+
+
+.completed-entry {
+    opacity: 0.65;
+
+    background: #f9fafb;
+}
+
+
+.completed-entry .entry-name {
+    text-decoration: line-through;
+
+    color: #6b7280;
+}
+
+
+.completed-label {
+    font-weight: 600;
+
+    font-size: 14px;
+
+    color: #16a34a;
+}
+
+
+.completed-empty {
+    color: #9ca3af;
+
+    font-size: 14px;
+
+    padding: 10px 0;
+}
+
+
+.remove-completed-button {
+    width: 22px;
+
+    height: 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: #f3f4f6;
+
+    color: #6b7280;
+
+    font-size: 16px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition: 0.15s;
+}
+
+
+.remove-completed-button:hover {
+    background: #fee2e2;
+
+    color: #dc2626;
+}
+
+
+/* =========================
+   DIALOG
+========================= */
+
+#new-entry-dialog {
+    width: 90%;
+
+    max-width: 450px;
+
+    border: none;
+
+    border-radius: 18px;
+
+    padding: 0;
+
+    margin: auto;
+
+    box-shadow:
+        0 20px 60px
+        rgba(0, 0, 0, 0.2);
+}
+
+
+#new-entry-dialog::backdrop {
+    background:
+        rgba(0, 0, 0, 0.4);
+
+    backdrop-filter:
+        blur(3px);
+}
+
+
+/* =========================
+   FORM
+========================= */
+
+#new-entry-form {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    padding: 28px;
+}
+
+
+.form-header {
+    display: flex;
+
+    align-items: center;
+
+    justify-content:
+        space-between;
+
+    margin-bottom: 10px;
+}
+
+
+.form-header h2 {
+    font-size: 24px;
+}
+
+
+.close-button {
+    background: none;
+
+    border: none;
+
+    font-size: 28px;
+
+    color: #6b7280;
+
+    cursor: pointer;
+
+    line-height: 1;
+}
+
+
+.close-button:hover {
+    color: #111827;
+}
+
+
+#new-entry-form label {
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #4b5563;
+
+    margin-top: 7px;
+}
+
+
+#new-entry-form input,
+#new-entry-form select {
+    width: 100%;
+
+    padding: 12px;
+
+    border:
+        1px solid
+        #d1d5db;
+
+    border-radius: 9px;
+
+    font-size: 15px;
+
+    background: white;
+
+    outline: none;
+}
+
+#planner {
+    display: none;
+}
+
+#new-entry-form input:focus,
+#new-entry-form select:focus {
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(37, 99, 235, 0.12);
+}
+
+
+.add-entry-button {
+    margin-top: 15px;
+
+    border: none;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    padding: 13px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+}
+
+
+.add-entry-button:hover {
+    background: #1d4ed8;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 650px) {
+
+    .planner {
+        width: 100%;
+
+        margin: 0;
+
+        min-height: 100vh;
+
+        border-radius: 0;
+
+        padding: 24px 18px;
+    }
+
+
+    .planner-header {
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+
+    .header-left h1 {
+        font-size: 25px;
+    }
+
+
+    #new-entry-button {
+        padding: 10px 14px;
+
+        font-size: 14px;
+    }
+
+
+    .summary {
+        flex-direction: column;
+
+        gap: 10px;
+    }
+
+
+    #due-soon-section {
+        padding: 14px;
+    }
+
+
+    .entry {
+        gap: 15px;
+
+        padding: 16px;
+    }
+
+
+    .entry-date {
+        min-width: 85px;
+    }
+
+
+    .days-until {
+        font-size: 13px;
+    }
+
+
+    .entry-name {
+        font-size: 16px;
+    }
+
+
+    .subject-icon {
+        width: 18px;
+
+        height: 18px;
+    }
+
+
+    .entry-type {
+        font-size: 10px;
+
+        padding: 5px 8px;
+    }
+
+
+    .remove-exam-button,
+    .remove-completed-button {
+        width: 20px;
+
+        height: 20px;
+
+        font-size: 14px;
+    }
+}

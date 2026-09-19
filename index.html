@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Planner App</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="script.js" defer></script>
+
+</head>
+
+
+<body>
+    <section id="auth-screen">
+
+        <div class="auth-card">
+
+            <h1>Planner App</h1>
+
+            <p>Sign in to access your homework.</p>
+
+            <input
+                type="email"
+                id="auth-email"
+                placeholder="Email"
+            >
+
+            <input
+                type="password"
+                id="auth-password"
+                placeholder="Password"
+            >
+
+            <button id="login-button">
+                Log In
+            </button>
+
+            <button id="signup-button">
+                Create Account
+            </button>
+
+            <p id="auth-message"></p>
+
+        </div>
+
+    </section>
+
+
+    <main class="planner" id="planner">
+
+        <!-- =========================
+             HEADER
+        ========================== -->
+
+        <header class="planner-header">
+
+            <div class="header-left">
+
+                <h1>Planner App</h1>
+
+                <p id="current-date">
+                    DATE HERE
+                </p>
+
+            </div>
+
+
+            <button
+                id="new-entry-button"
+                type="button"
+            >
+                New Entry
+            </button>
+
+        </header>
+
+
+        <!-- =========================
+             SUMMARY
+        ========================== -->
+
+        <section class="summary">
+
+            <p class="summary-text">
+
+                You have
+
+                <span id="assignment-count">
+                    0
+                </span>
+
+                assignments to complete
+
+            </p>
+
+
+            <p class="summary-text">
+
+                You have
+
+                <span id="exam-count">
+                    0
+                </span>
+
+                exams coming up
+
+            </p>
+
+        </section>
+
+
+        <!-- =========================
+             DUE
+        ========================== -->
+
+        <section class="due-section">
+
+            <h2>Due</h2>
+
+
+            <!-- TODAY + TOMORROW -->
+
+            <div id="due-soon-section">
+
+                <div class="due-soon-header">
+                    <p>Due Soon</p>
+                </div>
+
+                <div id="due-soon-list"></div>
+
+            </div>
+
+
+            <!-- UPCOMING -->
+
+            <div
+                id="upcoming-header"
+                class="upcoming-header"
+            >
+                Upcoming
+            </div>
+
+
+            <div id="entry-list"></div>
+
+        </section>
+
+
+        <!-- =========================
+             COMPLETED
+        ========================== -->
+
+        <section class="completed-section">
+
+            <h2>
+                Completed Assignments
+            </h2>
+
+            <div id="completed-list"></div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================
+         NEW ENTRY DIALOG
+    ========================== -->
+
+    <dialog id="new-entry-dialog">
+
+        <form id="new-entry-form">
+
+            <div class="form-header">
+
+                <h2>
+                    New Entry
+                </h2>
+
+
+                <button
+                    type="button"
+                    id="close-entry-button"
+                    class="close-button"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <label for="entry-name">
+                Name
+            </label>
+
+            <input
+                type="text"
+                id="entry-name"
+                placeholder="Enter name here"
+                required
+            >
+
+
+            <label for="entry-subject">
+                Subject
+            </label>
+
+            <select
+                id="entry-subject"
+                required
+            ></select>
+
+
+            <label for="entry-type">
+                Type
+            </label>
+
+            <select
+                id="entry-type"
+                required
+            >
+
+                <option value="assignment">
+                    Assignment
+                </option>
+
+                <option value="exam">
+                    Exam
+                </option>
+
+            </select>
+
+
+            <label for="entry-due-date">
+                Due Date
+            </label>
+
+            <input
+                type="date"
+                id="entry-due-date"
+                required
+            >
+
+
+            <button
+                type="submit"
+                class="add-entry-button"
+            >
+                Add Entry
+            </button>
+
+        </form>
+
+    </dialog>
+
+</body>
+
+</html>

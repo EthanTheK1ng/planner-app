@@ -3,7 +3,7 @@
 // =========================
 
 const VAPID_PUBLIC_KEY =
-    "BGeDXLumj1HOQW-IPVYJm4eJfaQxqHeYE8N4RCqa3g_k_JumRpOLMg_sscTklYBd2aMBMf7QeKR16wXTD7CqJDU";
+    "PASTE_YOUR_VAPID_PUBLIC_KEY_HERE";
 
 
 const REGISTER_PUSH_URL =
@@ -138,6 +138,131 @@ async function registerServiceWorker() {
 
 
 // =========================
+// UPDATE BUTTON STATE
+// =========================
+
+async function updateNotificationButton() {
+
+    if (
+        !notificationButton
+    ) {
+
+        return;
+    }
+
+
+    if (
+        !(
+            "Notification"
+            in
+            window
+        )
+        ||
+        !(
+            "serviceWorker"
+            in
+            navigator
+        )
+        ||
+        !(
+            "PushManager"
+            in
+            window
+        )
+    ) {
+
+        notificationButton
+            .textContent =
+            "Notifications Unsupported";
+
+        notificationButton
+            .disabled =
+            true;
+
+        return;
+    }
+
+
+    // If permission has not been granted,
+    // they still need to enable notifications.
+
+    if (
+        Notification.permission
+        !==
+        "granted"
+    ) {
+
+        notificationButton
+            .textContent =
+            "Enable Notifications";
+
+        notificationButton
+            .disabled =
+            false;
+
+        return;
+    }
+
+
+    try {
+
+        const registration =
+            await navigator
+                .serviceWorker
+                .ready;
+
+
+        const subscription =
+            await registration
+                .pushManager
+                .getSubscription();
+
+
+        if (
+            subscription
+        ) {
+
+            notificationButton
+                .textContent =
+                "Notifications Enabled";
+
+            notificationButton
+                .disabled =
+                true;
+
+        } else {
+
+            notificationButton
+                .textContent =
+                "Enable Notifications";
+
+            notificationButton
+                .disabled =
+                false;
+        }
+
+    } catch (
+        error
+    ) {
+
+        console.error(
+            "Could not check notification status:",
+            error
+        );
+
+
+        notificationButton
+            .textContent =
+            "Enable Notifications";
+
+        notificationButton
+            .disabled =
+            false;
+    }
+}
+
+
+// =========================
 // ENABLE PUSH
 // =========================
 
@@ -227,26 +352,40 @@ async function enableNotifications() {
                 .getSubscription();
 
 
+        // Already subscribed?
+        // Then there is nothing else to do.
+
         if (
-            !subscription
+            subscription
         ) {
 
-            subscription =
-                await registration
-                    .pushManager
-                    .subscribe(
-                        {
-                            userVisibleOnly:
-                                true,
+            await updateNotificationButton();
 
-                            applicationServerKey:
-                                urlBase64ToUint8Array(
-                                    VAPID_PUBLIC_KEY
-                                )
-                        }
-                    );
+            return;
         }
 
+
+        // Create a subscription only if one
+        // does not already exist.
+
+        subscription =
+            await registration
+                .pushManager
+                .subscribe(
+                    {
+                        userVisibleOnly:
+                            true,
+
+                        applicationServerKey:
+                            urlBase64ToUint8Array(
+                                VAPID_PUBLIC_KEY
+                            )
+                    }
+                );
+
+
+        // Only ask for the PIN when registering
+        // a brand-new device.
 
         const pin =
             prompt(
@@ -313,21 +452,16 @@ async function enableNotifications() {
         }
 
 
-        notificationButton
-            .textContent =
-            "Notifications Enabled";
-
-
-        notificationButton
-            .disabled =
-            true;
+        await updateNotificationButton();
 
 
         alert(
             "Notifications are enabled on this device."
         );
 
-    } catch (error) {
+    } catch (
+        error
+    ) {
 
         console.error(
             "Notification setup failed:",
@@ -354,16 +488,31 @@ notificationButton
 
 
 // =========================
-// INITIAL SERVICE WORKER
+// STARTUP
 // =========================
 
-registerServiceWorker()
-    .catch(
-        error => {
+async function startNotifications() {
 
-            console.error(
-                "Service worker registration failed:",
-                error
-            );
-        }
-    );
+    try {
+
+        await registerServiceWorker();
+
+        await navigator
+            .serviceWorker
+            .ready;
+
+        await updateNotificationButton();
+
+    } catch (
+        error
+    ) {
+
+        console.error(
+            "Notification startup failed:",
+            error
+        );
+    }
+}
+
+
+startNotifications();

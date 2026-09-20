@@ -144,38 +144,6 @@ const entryDueDateInput =
         "entry-due-date"
     );
 
-const authScreen =
-    document.getElementById(
-        "auth-screen"
-    );
-
-const planner =
-    document.getElementById(
-        "planner"
-    );
-
-
-// =========================
-// HIDE OLD LOGIN SCREEN
-// =========================
-
-if (
-    authScreen
-) {
-
-    authScreen.style.display =
-        "none";
-}
-
-
-if (
-    planner
-) {
-
-    planner.style.display =
-        "block";
-}
-
 
 // =========================
 // LOAD ENTRIES

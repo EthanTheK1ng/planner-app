@@ -5,19 +5,19 @@
     <link rel="manifest" href="manifest.json">
 
     <meta name="theme-color" content="#ffffff">
-    
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Planner">
-    
+
     <link rel="apple-touch-icon" href="icons/planner-192.png">
-    
+
     <link
         rel="icon"
         type="image/png"
         href="icons/planner-192.png"
     >
-    
+
     <meta charset="UTF-8">
 
     <meta
@@ -32,7 +32,7 @@
         href="style.css"
     >
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@Supabase/supabase-js@2"></script>
 
     <script src="script.js" defer></script>
 
@@ -104,15 +104,13 @@
             >
                 Enable Notifications
             </button>
-            
+
             <button
                 id="new-entry-button"
                 type="button"
             >
                 New Entry
             </button>
-
-            
 
         </header>
 
@@ -194,9 +192,22 @@
 
         <section class="completed-section">
 
-            <h2>
-                Completed Assignments
-            </h2>
+            <div class="completed-header">
+
+                <h2>
+                    Completed Assignments
+                </h2>
+
+                <button
+                    id="clear-completed-button"
+                    class="clear-completed-button"
+                    type="button"
+                    style="display: none;"
+                >
+                    Clear
+                </button>
+
+            </div>
 
             <div id="completed-list"></div>
 

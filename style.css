@@ -676,10 +676,6 @@ body {
     outline: none;
 }
 
-#planner {
-    display: none;
-}
-
 #new-entry-form input:focus,
 #new-entry-form select:focus {
     border-color: #2563eb;

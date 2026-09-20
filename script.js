@@ -1957,3 +1957,312 @@ async function startApp() {
 
 
 startApp();
+
+// =====================================
+// CLEAR COMPLETED ASSIGNMENTS BUTTON
+// =====================================
+
+const completedAssignmentsHeading =
+    [
+        ...document.querySelectorAll(
+            "h1, h2, h3, h4"
+        )
+    ].find(
+        heading =>
+            heading.textContent
+                .trim()
+                .toLowerCase()
+            ===
+            "completed assignments"
+    );
+
+
+let clearCompletedButton = null;
+
+
+// =====================================
+// CREATE HEADER + CLEAR BUTTON
+// =====================================
+
+if (
+    completedAssignmentsHeading
+) {
+
+    const completedHeader =
+        document.createElement(
+            "div"
+        );
+
+
+    completedHeader.classList.add(
+        "completed-header"
+    );
+
+
+    clearCompletedButton =
+        document.createElement(
+            "button"
+        );
+
+
+    clearCompletedButton.id =
+        "clear-completed-button";
+
+
+    clearCompletedButton.classList.add(
+        "clear-completed-button"
+    );
+
+
+    clearCompletedButton.type =
+        "button";
+
+
+    clearCompletedButton.textContent =
+        "Clear";
+
+
+    clearCompletedButton.title =
+        "Clear all completed assignments";
+
+
+    // Put the new header where the old
+    // Completed Assignments heading was.
+
+    completedAssignmentsHeading
+        .parentNode
+        .insertBefore(
+            completedHeader,
+            completedAssignmentsHeading
+        );
+
+
+    completedHeader.appendChild(
+        completedAssignmentsHeading
+    );
+
+
+    completedHeader.appendChild(
+        clearCompletedButton
+    );
+}
+
+
+// =====================================
+// UPDATE CLEAR BUTTON
+// =====================================
+
+function updateClearCompletedButton() {
+
+    if (
+        !clearCompletedButton
+    ) {
+
+        return;
+    }
+
+
+    const completedAssignments =
+        entries.filter(
+            entry => {
+
+                return (
+                    entry.type
+                    ===
+                    "assignment"
+                    &&
+                    entry.completed
+                );
+            }
+        );
+
+
+    clearCompletedButton.style.display =
+        completedAssignments.length
+        >
+        0
+            ?
+            "inline-flex"
+            :
+            "none";
+
+
+    clearCompletedButton.disabled =
+        false;
+}
+
+
+// =====================================
+// CLEAR COMPLETED ASSIGNMENTS
+// =====================================
+
+async function clearCompletedAssignments() {
+
+    const completedAssignments =
+        entries.filter(
+            entry => {
+
+                return (
+                    entry.type
+                    ===
+                    "assignment"
+                    &&
+                    entry.completed
+                );
+            }
+        );
+
+
+    if (
+        completedAssignments.length
+        ===
+        0
+    ) {
+
+        return;
+    }
+
+
+    const word =
+        completedAssignments.length
+        ===
+        1
+            ?
+            "assignment"
+            :
+            "assignments";
+
+
+    const confirmed =
+        confirm(
+            `Permanently delete ${
+                completedAssignments.length
+            } completed ${
+                word
+            }?`
+        );
+
+
+    if (
+        !confirmed
+    ) {
+
+        return;
+    }
+
+
+    clearCompletedButton.disabled =
+        true;
+
+
+    clearCompletedButton.textContent =
+        "Clearing...";
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "entries"
+            )
+            .delete()
+            .eq(
+                "type",
+                "assignment"
+            )
+            .eq(
+                "completed",
+                true
+            );
+
+
+    if (
+        error
+    ) {
+
+        console.error(
+            "Could not clear completed assignments:",
+            error
+        );
+
+
+        alert(
+            "There was a problem clearing the completed assignments."
+        );
+
+
+        clearCompletedButton.disabled =
+            false;
+
+
+        clearCompletedButton.textContent =
+            "Clear";
+
+
+        return;
+    }
+
+
+    await loadEntries();
+
+
+    clearCompletedButton.textContent =
+        "Clear";
+
+
+    updateClearCompletedButton();
+}
+
+
+// =====================================
+// CLEAR BUTTON CLICK
+// =====================================
+
+if (
+    clearCompletedButton
+) {
+
+    clearCompletedButton.addEventListener(
+        "click",
+        clearCompletedAssignments
+    );
+}
+
+
+// =====================================
+// WATCH COMPLETED LIST
+// =====================================
+
+// Automatically show/hide the Clear
+// button whenever assignments change.
+
+if (
+    completedList
+) {
+
+    const completedListObserver =
+        new MutationObserver(
+            () => {
+
+                updateClearCompletedButton();
+            }
+        );
+
+
+    completedListObserver.observe(
+        completedList,
+        {
+            childList:
+                true,
+
+            subtree:
+                true
+        }
+    );
+}
+
+
+// Initial state
+
+updateClearCompletedButton();

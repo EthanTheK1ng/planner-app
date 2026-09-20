@@ -1,6 +1,7 @@
 // =========================
 // SUPABASE
 // =========================
+
 let entriesRealtimeChannel = null;
 
 const SUPABASE_URL =
@@ -51,9 +52,6 @@ const subjectIcons = {
 // ENTRIES
 // =========================
 
-// Entries now come from Supabase,
-// NOT localStorage.
-
 let entries = [];
 
 
@@ -101,6 +99,11 @@ const completedList =
         "completed-list"
     );
 
+const clearCompletedButton =
+    document.getElementById(
+        "clear-completed-button"
+    );
+
 const newEntryButton =
     document.getElementById(
         "new-entry-button"
@@ -141,17 +144,6 @@ const entryDueDateInput =
         "entry-due-date"
     );
 
-
-// =========================
-// REMOVE OLD LOGIN SCREEN
-// =========================
-
-// You still have the old auth screen in
-// your HTML right now.
-//
-// This hides it automatically so you
-// don't need to remove it immediately.
-
 const authScreen =
     document.getElementById(
         "auth-screen"
@@ -163,14 +155,22 @@ const planner =
     );
 
 
-if (authScreen) {
+// =========================
+// HIDE OLD LOGIN SCREEN
+// =========================
+
+if (
+    authScreen
+) {
 
     authScreen.style.display =
         "none";
 }
 
 
-if (planner) {
+if (
+    planner
+) {
 
     planner.style.display =
         "block";
@@ -178,24 +178,34 @@ if (planner) {
 
 
 // =========================
-// LOAD ENTRIES FROM SUPABASE
+// LOAD ENTRIES
 // =========================
 
 async function loadEntries() {
 
-    const { data, error } =
+    const {
+        data,
+        error
+    } =
         await supabaseClient
-            .from("entries")
-            .select("*")
+            .from(
+                "entries"
+            )
+            .select(
+                "*"
+            )
             .order(
                 "due_date",
                 {
-                    ascending: true
+                    ascending:
+                        true
                 }
             );
 
 
-    if (error) {
+    if (
+        error
+    ) {
 
         console.error(
             "Error loading entries:",
@@ -207,14 +217,27 @@ async function loadEntries() {
 
 
     entries =
-        data.map(entry => ({
-            id: entry.id,
-            name: entry.name,
-            subject: entry.subject,
-            type: entry.type,
-            dueDate: entry.due_date,
-            completed: entry.completed
-        }));
+        data.map(
+            entry => ({
+                id:
+                    entry.id,
+
+                name:
+                    entry.name,
+
+                subject:
+                    entry.subject,
+
+                type:
+                    entry.type,
+
+                dueDate:
+                    entry.due_date,
+
+                completed:
+                    entry.completed
+            })
+        );
 
 
     updateCounts();
@@ -226,10 +249,8 @@ async function loadEntries() {
 
 
 // =========================
-// ADD ENTRY TO DATABASE
+// ADD ENTRY
 // =========================
-
-
 
 async function addEntryToDatabase(
     newEntry
@@ -239,27 +260,32 @@ async function addEntryToDatabase(
         error
     } =
         await supabaseClient
-            .from("entries")
-            .insert({
+            .from(
+                "entries"
+            )
+            .insert(
+                {
+                    name:
+                        newEntry.name,
 
-                name:
-                    newEntry.name,
+                    subject:
+                        newEntry.subject,
 
-                subject:
-                    newEntry.subject,
+                    type:
+                        newEntry.type,
 
-                type:
-                    newEntry.type,
+                    due_date:
+                        newEntry.dueDate,
 
-                due_date:
-                    newEntry.dueDate,
-
-                completed:
-                    false
-            });
+                    completed:
+                        false
+                }
+            );
 
 
-    if (error) {
+    if (
+        error
+    ) {
 
         console.error(
             "Could not add entry:",
@@ -275,7 +301,6 @@ async function addEntryToDatabase(
 
 
     await loadEntries();
-
 
     return true;
 }
@@ -293,19 +318,24 @@ async function completeEntry(
         error
     } =
         await supabaseClient
-            .from("entries")
-            .update({
-
-                completed:
-                    true
-            })
+            .from(
+                "entries"
+            )
+            .update(
+                {
+                    completed:
+                        true
+                }
+            )
             .eq(
                 "id",
                 entry.id
             );
 
 
-    if (error) {
+    if (
+        error
+    ) {
 
         console.error(
             "Could not complete entry:",
@@ -321,7 +351,6 @@ async function completeEntry(
 
 
     await loadEntries();
-
 
     return true;
 }
@@ -339,19 +368,24 @@ async function restoreEntry(
         error
     } =
         await supabaseClient
-            .from("entries")
-            .update({
-
-                completed:
-                    false
-            })
+            .from(
+                "entries"
+            )
+            .update(
+                {
+                    completed:
+                        false
+                }
+            )
             .eq(
                 "id",
                 entry.id
             );
 
 
-    if (error) {
+    if (
+        error
+    ) {
 
         console.error(
             "Could not restore entry:",
@@ -368,13 +402,12 @@ async function restoreEntry(
 
     await loadEntries();
 
-
     return true;
 }
 
 
 // =========================
-// DELETE ENTRY
+// DELETE ONE ENTRY
 // =========================
 
 async function deleteEntry(
@@ -385,7 +418,9 @@ async function deleteEntry(
         error
     } =
         await supabaseClient
-            .from("entries")
+            .from(
+                "entries"
+            )
             .delete()
             .eq(
                 "id",
@@ -393,7 +428,9 @@ async function deleteEntry(
             );
 
 
-    if (error) {
+    if (
+        error
+    ) {
 
         console.error(
             "Could not delete entry:",
@@ -410,29 +447,156 @@ async function deleteEntry(
 
     await loadEntries();
 
-
     return true;
 }
 
 
 // =========================
-// MIGRATE OLD LOCALSTORAGE
+// CLEAR COMPLETED ASSIGNMENTS
 // =========================
 
-// This allows your OLD saved homework
-// from the previous version of the app
-// to move into Supabase.
-//
-// It only does this if:
-// 1. localStorage has old entries
-// 2. Supabase currently has zero entries
-//
-// This prevents most duplicate imports.
+async function clearCompletedAssignments() {
+
+    const completedAssignments =
+        entries.filter(
+            entry => {
+
+                return (
+                    entry.type
+                    ===
+                    "assignment"
+                    &&
+                    entry.completed
+                );
+            }
+        );
+
+
+    if (
+        completedAssignments.length
+        ===
+        0
+    ) {
+
+        return;
+    }
+
+
+    const word =
+        completedAssignments.length
+        ===
+        1
+            ?
+            "assignment"
+            :
+            "assignments";
+
+
+    const confirmed =
+        confirm(
+            `Permanently delete ${
+                completedAssignments.length
+            } completed ${
+                word
+            }?`
+        );
+
+
+    if (
+        !confirmed
+    ) {
+
+        return;
+    }
+
+
+    if (
+        clearCompletedButton
+    ) {
+
+        clearCompletedButton.disabled =
+            true;
+
+        clearCompletedButton.textContent =
+            "Clearing...";
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "entries"
+            )
+            .delete()
+            .eq(
+                "type",
+                "assignment"
+            )
+            .eq(
+                "completed",
+                true
+            );
+
+
+    if (
+        error
+    ) {
+
+        console.error(
+            "Could not clear completed assignments:",
+            error
+        );
+
+
+        alert(
+            "There was a problem clearing the completed assignments."
+        );
+
+
+        if (
+            clearCompletedButton
+        ) {
+
+            clearCompletedButton.disabled =
+                false;
+
+            clearCompletedButton.textContent =
+                "Clear";
+        }
+
+
+        return;
+    }
+
+
+    await loadEntries();
+
+
+    if (
+        clearCompletedButton
+    ) {
+
+        clearCompletedButton.disabled =
+            false;
+
+        clearCompletedButton.textContent =
+            "Clear";
+    }
+}
+
+
+// =========================
+// REALTIME
+// =========================
 
 function subscribeToEntryChanges() {
 
-    // Prevent duplicate subscriptions
-    if (entriesRealtimeChannel) {
+    if (
+        entriesRealtimeChannel
+    ) {
+
         supabaseClient.removeChannel(
             entriesRealtimeChannel
         );
@@ -441,13 +605,20 @@ function subscribeToEntryChanges() {
 
     entriesRealtimeChannel =
         supabaseClient
-            .channel("entries-realtime")
+            .channel(
+                "entries-realtime"
+            )
             .on(
                 "postgres_changes",
                 {
-                    event: "*",
-                    schema: "public",
-                    table: "entries"
+                    event:
+                        "*",
+
+                    schema:
+                        "public",
+
+                    table:
+                        "entries"
                 },
                 async payload => {
 
@@ -456,18 +627,25 @@ function subscribeToEntryChanges() {
                         payload
                     );
 
+
                     await loadEntries();
                 }
             )
-            .subscribe(status => {
+            .subscribe(
+                status => {
 
-                console.log(
-                    "Realtime status:",
-                    status
-                );
-            });
+                    console.log(
+                        "Realtime status:",
+                        status
+                    );
+                }
+            );
 }
 
+
+// =========================
+// MIGRATE OLD LOCALSTORAGE
+// =========================
 
 async function migrateOldEntries() {
 
@@ -477,7 +655,9 @@ async function migrateOldEntries() {
         );
 
 
-    if (!oldSavedEntries) {
+    if (
+        !oldSavedEntries
+    ) {
 
         return;
     }
@@ -493,7 +673,9 @@ async function migrateOldEntries() {
                 oldSavedEntries
             );
 
-    } catch (error) {
+    } catch (
+        error
+    ) {
 
         console.error(
             "Could not read old localStorage entries:",
@@ -509,7 +691,9 @@ async function migrateOldEntries() {
             oldEntries
         )
         ||
-        oldEntries.length === 0
+        oldEntries.length
+        ===
+        0
     ) {
 
         return;
@@ -518,20 +702,28 @@ async function migrateOldEntries() {
 
     const {
         count,
-        error: countError
+        error:
+            countError
     } =
         await supabaseClient
-            .from("entries")
+            .from(
+                "entries"
+            )
             .select(
                 "*",
                 {
-                    count: "exact",
-                    head: true
+                    count:
+                        "exact",
+
+                    head:
+                        true
                 }
             );
 
 
-    if (countError) {
+    if (
+        countError
+    ) {
 
         console.error(
             "Could not check database:",
@@ -542,49 +734,57 @@ async function migrateOldEntries() {
     }
 
 
-    // Only migrate if Supabase is empty.
-
-    if (count > 0) {
+    if (
+        count
+        >
+        0
+    ) {
 
         return;
     }
 
 
     const entriesToUpload =
-        oldEntries.map(entry => {
+        oldEntries.map(
+            entry => {
 
-            return {
+                return {
+                    name:
+                        entry.name,
 
-                name:
-                    entry.name,
+                    subject:
+                        entry.subject,
 
-                subject:
-                    entry.subject,
+                    type:
+                        entry.type,
 
-                type:
-                    entry.type,
+                    due_date:
+                        entry.dueDate,
 
-                due_date:
-                    entry.dueDate,
-
-                completed:
-                    entry.completed
-                        ?? false
-            };
-        });
+                    completed:
+                        entry.completed
+                        ??
+                        false
+                };
+            }
+        );
 
 
     const {
         error
     } =
         await supabaseClient
-            .from("entries")
+            .from(
+                "entries"
+            )
             .insert(
                 entriesToUpload
             );
 
 
-    if (error) {
+    if (
+        error
+    ) {
 
         console.error(
             "Could not migrate old entries:",
@@ -599,8 +799,6 @@ async function migrateOldEntries() {
         "Old planner entries moved to Supabase."
     );
 
-
-    // Old entries are now safely online.
 
     localStorage.removeItem(
         "plannerEntries"
@@ -658,9 +856,17 @@ function parseDate(
 
 
     return new Date(
-        Number(year),
-        Number(month) - 1,
-        Number(day)
+        Number(
+            year
+        ),
+        Number(
+            month
+        )
+        -
+        1,
+        Number(
+            day
+        )
     );
 }
 
@@ -758,7 +964,9 @@ function getDueText(
 
 
     if (
-        daysUntilDue === 0
+        daysUntilDue
+        ===
+        0
     ) {
 
         return "Today";
@@ -766,7 +974,9 @@ function getDueText(
 
 
     if (
-        daysUntilDue === 1
+        daysUntilDue
+        ===
+        1
     ) {
 
         return "Tomorrow";
@@ -774,7 +984,9 @@ function getDueText(
 
 
     if (
-        daysUntilDue < 0
+        daysUntilDue
+        <
+        0
     ) {
 
         return "Overdue";
@@ -788,7 +1000,7 @@ function getDueText(
 
 
 // =========================
-// CREATE SUBJECT ROW
+// SUBJECT ROW
 // =========================
 
 function createSubjectRow(
@@ -831,8 +1043,6 @@ function createSubjectRow(
         } icon`;
 
 
-    // Hide broken/missing icons
-
     icon.addEventListener(
         "error",
         () => {
@@ -873,7 +1083,7 @@ function createSubjectRow(
 
 
 // =========================
-// UPDATE COUNTS
+// COUNTS
 // =========================
 
 function updateCounts() {
@@ -921,7 +1131,9 @@ function updateCounts() {
 
 
     const assignmentText =
-        assignments.length === 1
+        assignments.length
+        ===
+        1
             ?
             "assignment to complete"
             :
@@ -936,7 +1148,9 @@ function updateCounts() {
 
 
     const examText =
-        exams.length === 1
+        exams.length
+        ===
+        1
             ?
             "exam coming up"
             :
@@ -999,7 +1213,7 @@ function renderEntries() {
         entry => {
 
             // Completed assignments
-            // go in the completed section.
+            // go in Completed Assignments.
 
             if (
                 entry.completed
@@ -1026,10 +1240,6 @@ function renderEntries() {
                 return;
             }
 
-
-            // =========================
-            // CARD
-            // =========================
 
             const article =
                 document.createElement(
@@ -1361,9 +1571,13 @@ function renderEntries() {
                 "assignment"
                 &&
                 (
-                    daysUntilDue === 0
+                    daysUntilDue
+                    ===
+                    0
                     ||
-                    daysUntilDue === 1
+                    daysUntilDue
+                    ===
+                    1
                 );
 
 
@@ -1396,20 +1610,20 @@ function renderEntries() {
     );
 
 
-    // Hide Due Soon if empty
-
     dueSoonSection.style.display =
-        dueSoonCount === 0
+        dueSoonCount
+        ===
+        0
             ?
             "none"
             :
             "block";
 
 
-    // Hide Upcoming if empty
-
     upcomingHeader.style.display =
-        upcomingEntryCount === 0
+        upcomingEntryCount
+        ===
+        0
             ?
             "none"
             :
@@ -1440,6 +1654,24 @@ function renderCompletedEntries() {
                 );
             }
         );
+
+
+    // Show Clear only if there is
+    // something to clear.
+
+    if (
+        clearCompletedButton
+    ) {
+
+        clearCompletedButton.style.display =
+            completedAssignments.length
+            ===
+            0
+                ?
+                "none"
+                :
+                "inline-flex";
+    }
 
 
     if (
@@ -1660,7 +1892,7 @@ function renderCompletedEntries() {
 
 
             // =========================
-            // REMOVE
+            // REMOVE BUTTON
             // =========================
 
             const removeButton =
@@ -1721,10 +1953,6 @@ function renderCompletedEntries() {
             );
 
 
-            // =========================
-            // BUILD CARD
-            // =========================
-
             article.appendChild(
                 checkbox
             );
@@ -1749,6 +1977,21 @@ function renderCompletedEntries() {
                 article
             );
         }
+    );
+}
+
+
+// =========================
+// CLEAR BUTTON
+// =========================
+
+if (
+    clearCompletedButton
+) {
+
+    clearCompletedButton.addEventListener(
+        "click",
+        clearCompletedAssignments
     );
 }
 
@@ -1821,7 +2064,7 @@ closeEntryButton.addEventListener(
 
 
 // =========================
-// ADD ENTRY
+// ADD ENTRY FORM
 // =========================
 
 newEntryForm.addEventListener(
@@ -1904,7 +2147,9 @@ function getTodayForInput() {
 
     const month =
         String(
-            today.getMonth() + 1
+            today.getMonth()
+            +
+            1
         ).padStart(
             2,
             "0"
@@ -1942,327 +2187,14 @@ async function startApp() {
     populateSubjects();
 
 
-    // Move your old localStorage homework
-    // into Supabase if appropriate.
-
     await migrateOldEntries();
 
 
-    // Load the current online database.
-
     await loadEntries();
-    
+
+
     subscribeToEntryChanges();
 }
 
 
 startApp();
-
-// =====================================
-// CLEAR COMPLETED ASSIGNMENTS BUTTON
-// =====================================
-
-const completedAssignmentsHeading =
-    [
-        ...document.querySelectorAll(
-            "h1, h2, h3, h4"
-        )
-    ].find(
-        heading =>
-            heading.textContent
-                .trim()
-                .toLowerCase()
-            ===
-            "completed assignments"
-    );
-
-
-let clearCompletedButton = null;
-
-
-// =====================================
-// CREATE HEADER + CLEAR BUTTON
-// =====================================
-
-if (
-    completedAssignmentsHeading
-) {
-
-    const completedHeader =
-        document.createElement(
-            "div"
-        );
-
-
-    completedHeader.classList.add(
-        "completed-header"
-    );
-
-
-    clearCompletedButton =
-        document.createElement(
-            "button"
-        );
-
-
-    clearCompletedButton.id =
-        "clear-completed-button";
-
-
-    clearCompletedButton.classList.add(
-        "clear-completed-button"
-    );
-
-
-    clearCompletedButton.type =
-        "button";
-
-
-    clearCompletedButton.textContent =
-        "Clear";
-
-
-    clearCompletedButton.title =
-        "Clear all completed assignments";
-
-
-    // Put the new header where the old
-    // Completed Assignments heading was.
-
-    completedAssignmentsHeading
-        .parentNode
-        .insertBefore(
-            completedHeader,
-            completedAssignmentsHeading
-        );
-
-
-    completedHeader.appendChild(
-        completedAssignmentsHeading
-    );
-
-
-    completedHeader.appendChild(
-        clearCompletedButton
-    );
-}
-
-
-// =====================================
-// UPDATE CLEAR BUTTON
-// =====================================
-
-function updateClearCompletedButton() {
-
-    if (
-        !clearCompletedButton
-    ) {
-
-        return;
-    }
-
-
-    const completedAssignments =
-        entries.filter(
-            entry => {
-
-                return (
-                    entry.type
-                    ===
-                    "assignment"
-                    &&
-                    entry.completed
-                );
-            }
-        );
-
-
-    clearCompletedButton.style.display =
-        completedAssignments.length
-        >
-        0
-            ?
-            "inline-flex"
-            :
-            "none";
-
-
-    clearCompletedButton.disabled =
-        false;
-}
-
-
-// =====================================
-// CLEAR COMPLETED ASSIGNMENTS
-// =====================================
-
-async function clearCompletedAssignments() {
-
-    const completedAssignments =
-        entries.filter(
-            entry => {
-
-                return (
-                    entry.type
-                    ===
-                    "assignment"
-                    &&
-                    entry.completed
-                );
-            }
-        );
-
-
-    if (
-        completedAssignments.length
-        ===
-        0
-    ) {
-
-        return;
-    }
-
-
-    const word =
-        completedAssignments.length
-        ===
-        1
-            ?
-            "assignment"
-            :
-            "assignments";
-
-
-    const confirmed =
-        confirm(
-            `Permanently delete ${
-                completedAssignments.length
-            } completed ${
-                word
-            }?`
-        );
-
-
-    if (
-        !confirmed
-    ) {
-
-        return;
-    }
-
-
-    clearCompletedButton.disabled =
-        true;
-
-
-    clearCompletedButton.textContent =
-        "Clearing...";
-
-
-    const {
-        error
-    } =
-        await supabaseClient
-            .from(
-                "entries"
-            )
-            .delete()
-            .eq(
-                "type",
-                "assignment"
-            )
-            .eq(
-                "completed",
-                true
-            );
-
-
-    if (
-        error
-    ) {
-
-        console.error(
-            "Could not clear completed assignments:",
-            error
-        );
-
-
-        alert(
-            "There was a problem clearing the completed assignments."
-        );
-
-
-        clearCompletedButton.disabled =
-            false;
-
-
-        clearCompletedButton.textContent =
-            "Clear";
-
-
-        return;
-    }
-
-
-    await loadEntries();
-
-
-    clearCompletedButton.textContent =
-        "Clear";
-
-
-    updateClearCompletedButton();
-}
-
-
-// =====================================
-// CLEAR BUTTON CLICK
-// =====================================
-
-if (
-    clearCompletedButton
-) {
-
-    clearCompletedButton.addEventListener(
-        "click",
-        clearCompletedAssignments
-    );
-}
-
-
-// =====================================
-// WATCH COMPLETED LIST
-// =====================================
-
-// Automatically show/hide the Clear
-// button whenever assignments change.
-
-if (
-    completedList
-) {
-
-    const completedListObserver =
-        new MutationObserver(
-            () => {
-
-                updateClearCompletedButton();
-            }
-        );
-
-
-    completedListObserver.observe(
-        completedList,
-        {
-            childList:
-                true,
-
-            subtree:
-                true
-        }
-    );
-}
-
-
-// Initial state
-
-updateClearCompletedButton();

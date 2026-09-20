@@ -811,3 +811,85 @@ body {
         font-size: 14px;
     }
 }
+
+/* =====================================
+   COMPLETED ASSIGNMENTS HEADER
+   ===================================== */
+
+.completed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 16px;
+}
+
+
+/* Keep the existing heading clean */
+
+.completed-header h1,
+.completed-header h2,
+.completed-header h3,
+.completed-header h4 {
+    margin-right: auto;
+}
+
+
+/* =====================================
+   CLEAR COMPLETED BUTTON
+   ===================================== */
+
+.clear-completed-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: #ef4444;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    padding: 7px 11px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.15s ease,
+        opacity 0.15s ease;
+}
+
+
+.clear-completed-button:hover {
+    background-color:
+        rgba(
+            239,
+            68,
+            68,
+            0.1
+        );
+}
+
+
+.clear-completed-button:active {
+    background-color:
+        rgba(
+            239,
+            68,
+            68,
+            0.16
+        );
+}
+
+
+.clear-completed-button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}

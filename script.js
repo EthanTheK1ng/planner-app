@@ -1,6 +1,7 @@
 // =========================
 // SUPABASE
 // =========================
+let entriesRealtimeChannel = null;
 
 const SUPABASE_URL =
     "https://edcmnuriwutqxprzhkhz.supabase.co";
@@ -182,23 +183,10 @@ if (planner) {
 
 async function loadEntries() {
 
-    const {
-        data,
-        error
-    } =
+    const { data, error } =
         await supabaseClient
             .from("entries")
-            .select(
-                `
-                id,
-                name,
-                subject,
-                type,
-                due_date,
-                completed,
-                created_at
-                `
-            )
+            .select("*")
             .order(
                 "due_date",
                 {
@@ -210,54 +198,23 @@ async function loadEntries() {
     if (error) {
 
         console.error(
-            "Could not load entries:",
+            "Error loading entries:",
             error
-        );
-
-        alert(
-            "There was a problem loading your planner."
         );
 
         return;
     }
 
 
-    // Convert database naming:
-    //
-    // due_date
-    //
-    // into the format your existing
-    // JavaScript uses:
-    //
-    // dueDate
-
     entries =
-        data.map(entry => {
-
-            return {
-
-                id:
-                    entry.id,
-
-                name:
-                    entry.name,
-
-                subject:
-                    entry.subject,
-
-                type:
-                    entry.type,
-
-                dueDate:
-                    entry.due_date,
-
-                completed:
-                    entry.completed,
-
-                createdAt:
-                    entry.created_at
-            };
-        });
+        data.map(entry => ({
+            id: entry.id,
+            name: entry.name,
+            subject: entry.subject,
+            type: entry.type,
+            dueDate: entry.due_date,
+            completed: entry.completed
+        }));
 
 
     updateCounts();
@@ -271,6 +228,8 @@ async function loadEntries() {
 // =========================
 // ADD ENTRY TO DATABASE
 // =========================
+
+
 
 async function addEntryToDatabase(
     newEntry
@@ -469,6 +428,46 @@ async function deleteEntry(
 // 2. Supabase currently has zero entries
 //
 // This prevents most duplicate imports.
+
+function subscribeToEntryChanges() {
+
+    // Prevent duplicate subscriptions
+    if (entriesRealtimeChannel) {
+        supabaseClient.removeChannel(
+            entriesRealtimeChannel
+        );
+    }
+
+
+    entriesRealtimeChannel =
+        supabaseClient
+            .channel("entries-realtime")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "entries"
+                },
+                async payload => {
+
+                    console.log(
+                        "Homework changed:",
+                        payload
+                    );
+
+                    await loadEntries();
+                }
+            )
+            .subscribe(status => {
+
+                console.log(
+                    "Realtime status:",
+                    status
+                );
+            });
+}
+
 
 async function migrateOldEntries() {
 
@@ -1952,6 +1951,8 @@ async function startApp() {
     // Load the current online database.
 
     await loadEntries();
+    
+    subscribeToEntryChanges();
 }
 
 

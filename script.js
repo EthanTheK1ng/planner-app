@@ -450,34 +450,6 @@ async function clearCompletedAssignments() {
     }
 
 
-    const word =
-        completedAssignments.length
-        ===
-        1
-            ?
-            "assignment"
-            :
-            "assignments";
-
-
-    const confirmed =
-        confirm(
-            `Permanently delete ${
-                completedAssignments.length
-            } completed ${
-                word
-            }?`
-        );
-
-
-    if (
-        !confirmed
-    ) {
-
-        return;
-    }
-
-
     if (
         clearCompletedButton
     ) {

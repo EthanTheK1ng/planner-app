@@ -256,8 +256,7 @@ input {
     margin-bottom: 18px;
 }
 
-#assessment-groups,
-#assignment-groups,
+#entry-groups,
 #completed-list {
     display: flex;
     flex-direction: column;
@@ -303,10 +302,23 @@ input {
 .entry {
     position: relative;
 
+    border-radius: 14px;
+
+    touch-action: pan-y;
+
+    overflow: hidden;
+}
+
+.entry-content {
+    position: relative;
+    z-index: 2;
+
     display: flex;
     align-items: center;
 
     gap: 18px;
+
+    width: 100%;
 
     background: #ffffff;
 
@@ -324,21 +336,18 @@ input {
 
     transition:
         box-shadow 0.2s,
-        transform 0.15s ease,
-        opacity 0.15s ease;
-
-    touch-action: pan-y;
-
-    overflow: hidden;
+        transform 0.18s ease,
+        background-color 0.18s ease,
+        border-color 0.18s ease;
 }
 
-.entry:hover {
+.entry:hover .entry-content {
     box-shadow:
         0 5px 15px
         rgba(0, 0, 0, 0.06);
 }
 
-.entry.swiping {
+.entry.swiping .entry-content {
     transition: none;
 }
 
@@ -346,10 +355,67 @@ input {
     opacity: 0.35;
 }
 
-.entry.sortable-chosen {
+.entry.sortable-chosen .entry-content {
     box-shadow:
         0 10px 25px
         rgba(0, 0, 0, 0.12);
+}
+
+/* Assignment cards due tomorrow keep the old highlighted look. */
+.entry.tomorrow-entry .entry-content {
+    background: #fff7ed;
+    border-color: #fdba74;
+}
+
+.entry.tomorrow-entry .days-until {
+    color: #ea580c;
+    font-weight: 700;
+}
+
+/* Preview revealed while swiping right. */
+.swipe-preview {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 7px;
+
+    padding-left: 20px;
+
+    background: #eff6ff;
+    color: #2563eb;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    opacity: 0;
+    transform: translateX(-8px);
+
+    pointer-events: none;
+}
+
+.swipe-preview-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 22px;
+    height: 22px;
+}
+
+.swipe-preview-icon svg {
+    width: 19px;
+    height: 19px;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .drag-handle {
@@ -968,7 +1034,7 @@ input {
         gap: 10px;
     }
 
-    .entry {
+    .entry-content {
         gap: 11px;
 
         padding: 14px 12px;

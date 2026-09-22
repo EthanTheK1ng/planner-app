@@ -1,1244 +1,491 @@
-/* =========================
-   RESET
-========================= */
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-html,
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    touch-action: pan-x pan-y;
-    background: #f5f6f8;
-    color: #1f2937;
-}
-
-button,
-input {
-    font: inherit;
-}
+/* =========================================================
+   SMOOTHER UI + UPDATED COLORS
+   Paste this at the VERY BOTTOM of style.css
+========================================================= */
 
 
 /* =========================
-   INITIAL LOADING SCREEN
+   GENERAL SMOOTH MOTION
 ========================= */
 
-.loading-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #f5f6f8;
-
-    transition:
-        opacity 0.2s ease,
-        visibility 0.2s ease;
+.planner {
+    animation:
+        planner-enter
+        0.32s
+        cubic-bezier(0.22, 1, 0.36, 1)
+        both;
 }
 
-.loading-screen.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
+@keyframes planner-enter {
 
-.loading-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
+    from {
+        opacity: 0;
+        transform:
+            translateY(8px);
+    }
 
-    color: #6b7280;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.loading-spinner,
-.button-spinner {
-    border-radius: 50%;
-    border-style: solid;
-    animation: planner-spin 0.75s linear infinite;
-}
-
-.loading-spinner {
-    width: 34px;
-    height: 34px;
-    border-width: 4px;
-    border-color: #dbeafe;
-    border-top-color: #2563eb;
-}
-
-@keyframes planner-spin {
     to {
-        transform: rotate(360deg);
+        opacity: 1;
+        transform:
+            translateY(0);
+    }
+}
+
+
+/* Entries smoothly appear */
+
+.entry {
+    animation:
+        entry-enter
+        0.22s
+        cubic-bezier(0.22, 1, 0.36, 1)
+        both;
+}
+
+@keyframes entry-enter {
+
+    from {
+        opacity: 0;
+        transform:
+            translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translateY(0);
+    }
+}
+
+
+/* Date groups also fade in nicely */
+
+.date-group {
+    animation:
+        group-enter
+        0.25s
+        ease
+        both;
+}
+
+@keyframes group-enter {
+
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
     }
 }
 
 
 /* =========================
-   MAIN APP
+   ENTRY CARDS
 ========================= */
 
-.planner {
-    width: 90%;
-    max-width: 900px;
-
-    margin: 50px auto;
-
-    background: white;
-
-    padding: 35px;
-
-    border-radius: 20px;
-
-    box-shadow:
-        0 10px 30px
-        rgba(0, 0, 0, 0.08);
-}
-
-
-/* =========================
-   HEADER
-========================= */
-
-.planner-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    gap: 20px;
-
-    margin-bottom: 40px;
-}
-
-.header-left h1 {
-    font-size: 30px;
-    margin-bottom: 6px;
-}
-
-#current-date {
-    color: #6b7280;
-    font-size: 15px;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-
-/* =========================
-   NOTIFICATIONS
-   intentionally unchanged
-========================= */
-
-#enable-notifications-button {
-    width: 36px;
-    height: 36px;
-    flex: 0 0 36px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    border: 1px solid #d1d5db;
-    border-radius: 50%;
-
-    background: white;
-    color: #4b5563;
-
-    padding: 0;
-
-    /* Hide the text visually while keeping the button text in the DOM
-       for compatibility with the existing notifications.js. */
-    font-size: 0;
-
-    cursor: pointer;
-
+.entry-content {
     transition:
-        background-color 0.15s ease,
-        border-color 0.15s ease,
-        transform 0.15s ease,
-        opacity 0.15s ease;
-}
+        transform 0.22s
+        cubic-bezier(0.22, 1, 0.36, 1),
 
-#enable-notifications-button::before {
-    content: "🔔";
+        box-shadow 0.22s ease,
 
-    display: block;
+        background-color 0.22s ease,
 
-    font-size: 17px;
-    line-height: 1;
-}
+        border-color 0.22s ease,
 
-#enable-notifications-button:hover {
-    background: #f3f4f6;
-    border-color: #cbd5e1;
-
-    transform: translateY(-1px);
-}
-
-#enable-notifications-button:active {
-    transform: translateY(0);
-}
-
-#enable-notifications-button:disabled {
-    opacity: 0.55;
-    cursor: default;
-    transform: none;
+        opacity 0.22s ease;
 }
 
 
-
-/* =========================
-   NEW ENTRY BUTTON
-========================= */
-
-#new-entry-button {
-    border: none;
-
-    background: #2563eb;
-    color: white;
-
-    font-size: 15px;
-    font-weight: 600;
-
-    padding: 12px 20px;
-
-    border-radius: 10px;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-}
-
-#new-entry-button:hover {
-    background: #1d4ed8;
-
+.entry:hover .entry-content {
     transform:
         translateY(-1px);
 }
 
-
-/* =========================
-   SUMMARY
-========================= */
-
-.summary {
-    display: flex;
-    gap: 20px;
-
-    margin-bottom: 40px;
-}
-
-.summary-text {
-    flex: 1;
-
-    background: #f8fafc;
-
-    padding: 18px 20px;
-
-    border-radius: 12px;
-
-    font-size: 16px;
-
-    border:
-        1px solid
-        #e5e7eb;
-}
-
-.summary-text span {
-    font-weight: bold;
-    font-size: 19px;
-}
-
-
-/* =========================
-   SECTIONS
-========================= */
-
-.planner-section {
-    margin-top: 36px;
-}
-
-.planner-section:first-of-type {
-    margin-top: 0;
-}
-
-.section-title-row,
-.completed-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 16px;
-
-    width: 100%;
-}
-
-.section-title-row h2,
-.completed-section h2 {
-    font-size: 22px;
-    margin-bottom: 18px;
-}
-
-#entry-groups,
-#completed-list {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-
-/* =========================
-   DATE GROUPS
-========================= */
-
-.date-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.date-group-title {
-    color: #6b7280;
-
-    font-size: 12px;
-    font-weight: 700;
-
-    text-transform: uppercase;
-    letter-spacing: 0.65px;
-
-    padding: 0 2px;
-}
-
-.entry-group-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
-    min-height: 4px;
-}
-
-
-/* =========================
-   ENTRY
-========================= */
-
-.entry {
-    position: relative;
-
-    border-radius: 14px;
-
-    touch-action: pan-y;
-
-    overflow: hidden;
-}
-
-.entry-content {
-    position: relative;
-    z-index: 2;
-
-    display: flex;
-    align-items: center;
-
-    gap: 18px;
-
-    width: 100%;
-
-    background: #ffffff;
-
-    border:
-        1px solid
-        #e5e7eb;
-
-    border-left:
-        6px solid
-        var(--subject-color);
-
-    padding: 16px 18px;
-
-    border-radius: 14px;
-
-    transition:
-        box-shadow 0.2s,
-        transform 0.18s ease,
-        background-color 0.18s ease,
-        border-color 0.18s ease;
-}
-
-.entry:hover .entry-content {
-    box-shadow:
-        0 5px 15px
-        rgba(0, 0, 0, 0.06);
-}
 
 .entry.swiping .entry-content {
     transition: none;
 }
 
-.entry.sortable-ghost {
-    opacity: 0.35;
+
+/* Makes the swipe preview smoothly disappear
+   after you release it */
+
+.swipe-preview {
+    transition:
+        opacity 0.16s ease,
+        transform 0.18s ease;
 }
 
-.entry.sortable-chosen .entry-content {
-    box-shadow:
-        0 10px 25px
-        rgba(0, 0, 0, 0.12);
+
+.entry.swiping .swipe-preview {
+    transition: none;
 }
 
-/* Assignment cards due tomorrow keep the old highlighted look. */
+
+/* =========================
+   TOMORROW ASSIGNMENTS
+========================= */
+
+/*
+   Softer peach instead of the old yellow/orange.
+   This stays visually separate from:
+   Exams = red
+   Quizzes = purple
+*/
+
 .entry.tomorrow-entry .entry-content {
-    background: #fff7ed;
-    border-color: #fdba74;
+    background:
+        linear-gradient(
+            90deg,
+            #fff1eb 0%,
+            #fff7f3 55%,
+            #ffffff 100%
+        );
+
+    border-color:
+        #f7b99a;
 }
+
 
 .entry.tomorrow-entry .days-until {
-    color: #ea580c;
-    font-weight: 700;
-}
-
-/* Preview revealed while swiping left. */
-.swipe-preview {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-
-    gap: 7px;
-
-    padding-right: 20px;
-
-    background: #eff6ff;
-    color: #2563eb;
-
-    font-size: 13px;
-    font-weight: 700;
-
-    opacity: 0;
-    transform: translateX(8px);
-
-    pointer-events: none;
-}
-
-.swipe-preview-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 22px;
-    height: 22px;
-}
-
-.swipe-preview-icon svg {
-    width: 19px;
-    height: 19px;
-
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-.drag-handle {
-    flex-shrink: 0;
-
-    border: none;
-    background: transparent;
-
-    color: #9ca3af;
-
-    font-size: 20px;
-    line-height: 1;
-
-    cursor: grab;
-
-    padding: 7px 3px;
-
-    touch-action: none;
-}
-
-.drag-handle:active {
-    cursor: grabbing;
-}
-
-.complete-checkbox {
-    width: 20px;
-    height: 20px;
-
-    flex-shrink: 0;
-
-    cursor: pointer;
-}
-
-.entry-date {
-    min-width: 105px;
-}
-
-.days-until {
-    font-weight: 600;
-    font-size: 14px;
-
-    color: #374151;
-}
-
-.actual-date {
-    margin-top: 4px;
-
-    font-size: 13px;
-
-    color: #9ca3af;
-}
-
-.entry-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.subject-row {
-    display: flex;
-    align-items: center;
-
-    gap: 7px;
-
-    margin-bottom: 5px;
-}
-
-.subject-icon {
-    width: 20px;
-    height: 20px;
-
-    object-fit: contain;
-
-    flex-shrink: 0;
-}
-
-.entry-subject {
-    font-size: 13px;
-
     color:
-        var(--subject-color);
+        #c45f32;
 
-    font-weight: 600;
-}
-
-.entry-name {
-    font-size: 17px;
-    font-weight: 600;
-
-    overflow-wrap: anywhere;
-}
-
-.entry-type {
-    flex-shrink: 0;
-
-    color: white;
-
-    padding: 6px 10px;
-
-    border-radius: 999px;
-
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.entry-type.exam {
-    background: #ea580c;
-}
-
-.entry-type.quiz {
-    background: #7c3aed;
+    /* Tomorrow should NOT be bold */
+    font-weight:
+        500;
 }
 
 
-/* Exams use a red/rose priority treatment so they do not blend
-   with the orange "due tomorrow" assignment highlight. */
-.entry.exam .entry-content {
-    background:
-        linear-gradient(
-            90deg,
-            #fff1f2 0%,
-            #fff7f7 48%,
-            #ffffff 100%
-        );
+/* =========================
+   EXAMS
+========================= */
 
-    border-color: #fda4af;
-    border-left-color: #e11d48;
-
-    box-shadow:
-        inset 0 0 0 1px
-        rgba(225, 29, 72, 0.08);
-}
-
-.entry.exam:hover .entry-content {
-    box-shadow:
-        inset 0 0 0 1px
-        rgba(225, 29, 72, 0.11),
-        0 6px 18px
-        rgba(225, 29, 72, 0.11);
-}
-
-.entry.exam .entry-name {
-    font-weight: 750;
-    color: #881337;
-}
+/* Keep exams noticeable,
+   but the due-date text itself isn't bold */
 
 .entry.exam .days-until {
-    color: #be123c;
-    font-weight: 800;
-}
-
-.entry.exam .entry-type.exam {
-    padding: 8px 12px;
-
-    border:
-        1px solid
+    color:
         #be123c;
 
-    background: #e11d48;
-
-    font-size: 12px;
-    font-weight: 800;
-
-    letter-spacing: 0.35px;
-    text-transform: uppercase;
-
-    box-shadow:
-        0 3px 8px
-        rgba(225, 29, 72, 0.22);
+    font-weight:
+        500;
 }
 
 
-/* Quizzes now stand out just as strongly as exams, but with
-   their own purple treatment. */
-.entry.quiz .entry-content {
-    background:
-        linear-gradient(
-            90deg,
-            #f5f3ff 0%,
-            #faf8ff 48%,
-            #ffffff 100%
-        );
+/* Keep the EXAM pill bold */
 
-    border-color: #c4b5fd;
-    border-left-color: #7c3aed;
-
-    box-shadow:
-        inset 0 0 0 1px
-        rgba(124, 58, 237, 0.08);
+.entry.exam .entry-type.exam {
+    font-weight:
+        800;
 }
 
-.entry.quiz:hover .entry-content {
-    box-shadow:
-        inset 0 0 0 1px
-        rgba(124, 58, 237, 0.11),
-        0 6px 18px
-        rgba(124, 58, 237, 0.11);
-}
 
-.entry.quiz .entry-name {
-    font-weight: 750;
-    color: #4c1d95;
-}
+/* =========================
+   QUIZZES
+========================= */
+
+/* Same idea for quizzes */
 
 .entry.quiz .days-until {
-    color: #6d28d9;
-    font-weight: 800;
-}
-
-.entry.quiz .entry-type.quiz {
-    padding: 8px 12px;
-
-    border:
-        1px solid
+    color:
         #6d28d9;
 
-    background: #7c3aed;
+    font-weight:
+        500;
+}
 
-    font-size: 12px;
-    font-weight: 800;
 
-    letter-spacing: 0.35px;
-    text-transform: uppercase;
+/* QUIZ pill stays bold */
 
-    box-shadow:
-        0 3px 8px
-        rgba(124, 58, 237, 0.22);
+.entry.quiz .entry-type.quiz {
+    font-weight:
+        800;
 }
 
 
 /* =========================
-   EMPTY STATES
+   BUTTONS
 ========================= */
 
-.empty-state,
-.completed-empty {
-    color: #9ca3af;
-
-    font-size: 14px;
-
-    padding: 10px 0;
-}
-
-
-/* =========================
-   COMPLETED
-========================= */
-
-.completed-section {
-    margin-top: 40px;
-}
-
-.completed-entry {
-    opacity: 0.68;
-    background: #f9fafb;
-}
-
-.completed-entry .entry-name {
-    text-decoration: line-through;
-    color: #6b7280;
-}
-
-.completed-label {
-    font-weight: 600;
-    font-size: 14px;
-    color: #16a34a;
-}
-
-.clear-completed-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    border: none;
-    outline: none;
-
-    background: transparent;
-
-    color: #6b7280;
-
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-
-    padding: 7px 11px;
-
-    border-radius: 8px;
-
-    cursor: pointer;
+#new-entry-button,
+#enable-notifications-button,
+.clear-completed-button,
+.choice-button,
+.no-due-date-button,
+.add-entry-button,
+.action-button,
+.close-button,
+.drag-handle {
 
     transition:
-        background-color 0.15s ease,
-        opacity 0.15s ease;
-}
-
-.clear-completed-button:hover {
-    background: #f3f4f6;
-}
-
-.clear-completed-button:active {
-    background: #e5e7eb;
-}
-
-.clear-completed-button:disabled {
-    opacity: 0.5;
-    cursor: default;
+        background-color 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        opacity 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s
+        cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 
-/* =========================
-   ENTRY DIALOG
-========================= */
+/* Nice button press */
 
-#new-entry-dialog {
-    width: 92%;
-    max-width: 520px;
+#new-entry-button:active,
+#enable-notifications-button:active,
+.clear-completed-button:active,
+.choice-button:active,
+.no-due-date-button:active,
+.add-entry-button:active,
+.action-button:active {
 
-    max-height: 88vh;
-
-    border: none;
-
-    border-radius: 18px;
-
-    padding: 0;
-
-    margin: auto;
-
-    box-shadow:
-        0 20px 60px
-        rgba(0, 0, 0, 0.2);
-
-    overflow: auto;
-}
-
-#new-entry-dialog::backdrop,
-.actions-dialog::backdrop {
-    background:
-        rgba(0, 0, 0, 0.4);
-
-    backdrop-filter:
-        blur(3px);
-}
-
-#new-entry-form {
-    display: flex;
-    flex-direction: column;
-
-    gap: 11px;
-
-    padding: 28px;
-}
-
-.form-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    margin-bottom: 10px;
-}
-
-.form-header h2 {
-    font-size: 24px;
-}
-
-.close-button {
-    background: none;
-    border: none;
-
-    font-size: 28px;
-
-    color: #6b7280;
-
-    cursor: pointer;
-
-    line-height: 1;
-}
-
-.close-button:hover {
-    color: #111827;
-}
-
-#new-entry-form label {
-    font-size: 13px;
-    font-weight: 600;
-
-    color: #4b5563;
-
-    margin-top: 7px;
-}
-
-#entry-name,
-#entry-due-date {
-    width: 100%;
-
-    padding: 12px;
-
-    border:
-        1px solid
-        #d1d5db;
-
-    border-radius: 9px;
-
-    font-size: 16px;
-
-    background: white;
-
-    outline: none;
-}
-
-#entry-name:focus,
-#entry-due-date:focus {
-    border-color: #2563eb;
-
-    box-shadow:
-        0 0 0 3px
-        rgba(37, 99, 235, 0.12);
+    transform:
+        scale(0.97);
 }
 
 
 /* =========================
-   QUICK CHOICE BUTTONS
+   CHOICE BUTTONS
 ========================= */
-
-.choice-grid {
-    display: flex;
-    flex-wrap: wrap;
-
-    gap: 8px;
-}
-
-.choice-button {
-    border:
-        1px solid
-        #d1d5db;
-
-    background: white;
-
-    color: #4b5563;
-
-    padding: 9px 11px;
-
-    border-radius: 10px;
-
-    font-size: 13px;
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition:
-        transform 0.1s ease,
-        background-color 0.15s ease,
-        border-color 0.15s ease,
-        box-shadow 0.15s ease;
-}
 
 .choice-button:hover {
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 4px 10px
+        rgba(0, 0, 0, 0.06);
+}
+
+
+.choice-button.selected {
     transform:
         translateY(-1px);
 }
 
-.choice-button.selected {
-    border-color:
-        var(--choice-color);
 
-    color:
-        var(--choice-color);
+/* =========================
+   INPUTS
+========================= */
 
-    background:
-        color-mix(
-            in srgb,
-            var(--choice-color) 9%,
-            white
-        );
+#entry-name,
+#entry-due-date {
+
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background-color 0.18s ease,
+        opacity 0.18s ease;
+}
+
+
+/* =========================
+   SUMMARY BOXES
+========================= */
+
+.summary-text {
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.summary-text:hover {
+    transform:
+        translateY(-1px);
 
     box-shadow:
-        0 0 0 2px
-        color-mix(
-            in srgb,
-            var(--choice-color) 15%,
-            transparent
-        );
-}
-
-.subject-choice {
-    display: inline-flex;
-    align-items: center;
-
-    gap: 6px;
-}
-
-.subject-choice img {
-    width: 17px;
-    height: 17px;
-
-    object-fit: contain;
+        0 4px 12px
+        rgba(0, 0, 0, 0.04);
 }
 
 
 /* =========================
-   OPTIONAL DATE
+   ADD / EDIT ENTRY DIALOG
 ========================= */
 
-.date-input-row {
-    display: flex;
-    align-items: stretch;
+#new-entry-dialog {
 
-    gap: 8px;
-}
+    opacity: 0;
 
-.date-input-row #entry-due-date {
-    flex: 1;
-}
+    transform:
+        translateY(14px)
+        scale(0.985);
 
-.no-due-date-button {
-    flex-shrink: 0;
+    transition:
+        opacity 0.2s ease,
 
-    border:
-        1px solid
-        #d1d5db;
+        transform 0.24s
+        cubic-bezier(0.22, 1, 0.36, 1),
 
-    background: white;
+        display 0.24s
+        allow-discrete,
 
-    color: #6b7280;
-
-    border-radius: 9px;
-
-    padding: 0 12px;
-
-    font-size: 13px;
-    font-weight: 600;
-
-    cursor: pointer;
-}
-
-.no-due-date-button.selected {
-    border-color: #6b7280;
-
-    background: #f3f4f6;
-
-    color: #374151;
-}
-
-#entry-due-date:disabled {
-    background: #f3f4f6;
-    color: #9ca3af;
+        overlay 0.24s
+        allow-discrete;
 }
 
 
-/* =========================
-   ADD / SAVE BUTTON
-========================= */
+#new-entry-dialog[open] {
 
-.add-entry-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    opacity: 1;
 
-    gap: 8px;
-
-    min-height: 44px;
-
-    margin-top: 16px;
-
-    border: none;
-
-    background: #2563eb;
-
-    color: white;
-
-    font-size: 15px;
-    font-weight: 600;
-
-    padding: 13px;
-
-    border-radius: 10px;
-
-    cursor: pointer;
+    transform:
+        translateY(0)
+        scale(1);
 }
 
-.add-entry-button:hover {
-    background: #1d4ed8;
-}
 
-.add-entry-button:disabled {
-    opacity: 0.7;
-    cursor: wait;
-}
+/* Starting animation when opening */
 
-.button-spinner {
-    display: none;
+@starting-style {
 
-    width: 17px;
-    height: 17px;
+    #new-entry-dialog[open] {
 
-    border-width: 2px;
+        opacity: 0;
 
-    border-color:
-        rgba(255, 255, 255, 0.4);
-
-    border-top-color: white;
-}
-
-.add-entry-button.loading .button-spinner {
-    display: inline-block;
+        transform:
+            translateY(14px)
+            scale(0.985);
+    }
 }
 
 
 /* =========================
-   SWIPE ACTION SHEET
+   SWIPE ACTION MENU
 ========================= */
 
 .actions-dialog {
-    width: min(92%, 420px);
 
-    border: none;
+    opacity: 0;
 
-    border-radius: 18px;
+    transform:
+        translateY(14px)
+        scale(0.985);
 
-    padding: 0;
+    transition:
+        opacity 0.2s ease,
 
-    margin: auto;
+        transform 0.24s
+        cubic-bezier(0.22, 1, 0.36, 1),
 
-    background: transparent;
+        display 0.24s
+        allow-discrete,
+
+        overlay 0.24s
+        allow-discrete;
 }
 
-.actions-card {
-    display: flex;
-    flex-direction: column;
 
-    gap: 8px;
+.actions-dialog[open] {
 
-    background: white;
+    opacity: 1;
 
-    padding: 18px;
-
-    border-radius: 18px;
-
-    box-shadow:
-        0 20px 60px
-        rgba(0, 0, 0, 0.2);
+    transform:
+        translateY(0)
+        scale(1);
 }
 
-.actions-entry-name {
-    font-size: 14px;
-    font-weight: 700;
 
-    color: #374151;
+@starting-style {
 
-    padding: 4px 4px 10px;
-}
+    .actions-dialog[open] {
 
-.action-button {
-    border: none;
+        opacity: 0;
 
-    background: #f3f4f6;
-
-    color: #111827;
-
-    padding: 13px;
-
-    border-radius: 11px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-}
-
-.action-button:hover {
-    background: #e5e7eb;
-}
-
-.delete-action-button {
-    color: #dc2626;
-}
-
-.cancel-action-button {
-    background: transparent;
-
-    color: #6b7280;
+        transform:
+            translateY(14px)
+            scale(0.985);
+    }
 }
 
 
 /* =========================
-   MOBILE
+   DIALOG BACKDROPS
 ========================= */
 
-@media (max-width: 650px) {
+#new-entry-dialog::backdrop,
+.actions-dialog::backdrop {
 
-    .planner {
-        width: 100%;
+    opacity: 0;
 
-        margin: 0;
+    transition:
+        opacity 0.22s ease,
 
-        min-height: 100vh;
+        display 0.22s
+        allow-discrete,
 
-        border-radius: 0;
+        overlay 0.22s
+        allow-discrete;
+}
 
-        padding: 24px 18px;
+
+#new-entry-dialog[open]::backdrop,
+.actions-dialog[open]::backdrop {
+
+    opacity: 1;
+}
+
+
+@starting-style {
+
+    #new-entry-dialog[open]::backdrop,
+    .actions-dialog[open]::backdrop {
+
+        opacity: 0;
     }
+}
 
-    .planner-header {
-        align-items: flex-start;
 
-        gap: 15px;
-    }
+/* =========================
+   LOADING SCREEN
+========================= */
 
-    .header-left {
-        min-width: 0;
-    }
+.loading-screen {
 
-    .header-left h1 {
-        font-size: 23px;
-    }
+    transition:
+        opacity 0.32s ease,
+        visibility 0.32s ease;
+}
 
-    .header-actions {
-        flex-direction: column-reverse;
-        align-items: stretch;
 
-        gap: 7px;
-    }
+/* =========================
+   COMPLETED ITEMS
+========================= */
 
-    #new-entry-button {
-        padding: 10px 13px;
+.completed-entry {
 
-        font-size: 13px;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease,
+        background-color 0.2s ease;
+}
 
-        white-space: nowrap;
-    }
 
-    .summary {
-        flex-direction: column;
+/* =========================
+   ACCESSIBILITY
+========================= */
 
-        gap: 10px;
-    }
+/* Don't force animations on people who have
+   reduced-motion enabled on their device. */
 
-    .entry-content {
-        gap: 11px;
+@media (prefers-reduced-motion: reduce) {
 
-        padding: 14px 12px;
-    }
+    *,
+    *::before,
+    *::after {
 
-    .drag-handle {
-        font-size: 18px;
-    }
+        animation-duration:
+            0.01ms !important;
 
-    .entry-date {
-        min-width: 72px;
-    }
+        animation-iteration-count:
+            1 !important;
 
-    .days-until {
-        font-size: 12px;
-    }
-
-    .actual-date {
-        font-size: 12px;
-    }
-
-    .entry-name {
-        font-size: 15px;
-    }
-
-    .subject-icon {
-        width: 18px;
-        height: 18px;
-    }
-
-    .entry-type {
-        font-size: 9px;
-
-        padding: 5px 7px;
-    }
-
-    #new-entry-form {
-        padding: 23px 18px;
-    }
-
-    .subject-choice-grid {
-        gap: 7px;
-    }
-
-    .choice-button {
-        padding: 8px 9px;
-
-        font-size: 12px;
-    }
-
-    .date-input-row {
-        flex-direction: column;
-    }
-
-    .no-due-date-button {
-        padding: 10px 12px;
+        transition-duration:
+            0.01ms !important;
     }
 }

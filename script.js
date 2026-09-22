@@ -83,24 +83,9 @@ const examCountElement =
         "exam-count"
     );
 
-const assignmentsSection =
+const entryGroups =
     document.getElementById(
-        "assignments-section"
-    );
-
-const assessmentsSection =
-    document.getElementById(
-        "assessments-section"
-    );
-
-const assignmentGroups =
-    document.getElementById(
-        "assignment-groups"
-    );
-
-const assessmentGroups =
-    document.getElementById(
-        "assessment-groups"
+        "entry-groups"
     );
 
 const completedList =
@@ -1236,6 +1221,21 @@ function createEntryCard(
     );
 
     if (
+        !completedView
+        &&
+        entry.type === "assignment"
+        &&
+        getDaysUntilDue(
+            entry.dueDate
+        ) === 1
+    ) {
+
+        article.classList.add(
+            "tomorrow-entry"
+        );
+    }
+
+    if (
         completedView
     ) {
 
@@ -1259,6 +1259,74 @@ function createEntryCard(
     article.style.setProperty(
         "--subject-color",
         subjectColor
+    );
+
+
+    // Swipe-right preview behind the card.
+
+    const swipePreview =
+        document.createElement(
+            "div"
+        );
+
+    swipePreview.classList.add(
+        "swipe-preview"
+    );
+
+    swipePreview.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+    const swipeIcon =
+        document.createElement(
+            "span"
+        );
+
+    swipeIcon.classList.add(
+        "swipe-preview-icon"
+    );
+
+    swipeIcon.innerHTML =
+        `<svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z" />
+        </svg>`;
+
+    const swipeText =
+        document.createElement(
+            "span"
+        );
+
+    swipeText.textContent =
+        "Edit";
+
+    swipePreview.appendChild(
+        swipeIcon
+    );
+
+    swipePreview.appendChild(
+        swipeText
+    );
+
+    article.appendChild(
+        swipePreview
+    );
+
+
+    // Visible card content moves right while swiping.
+
+    const content =
+        document.createElement(
+            "div"
+        );
+
+    content.classList.add(
+        "entry-content"
+    );
+
+    article.appendChild(
+        content
     );
 
 
@@ -1291,7 +1359,7 @@ function createEntryCard(
             "Drag to reorder"
         );
 
-        article.appendChild(
+        content.appendChild(
             dragHandle
         );
     }
@@ -1356,7 +1424,7 @@ function createEntryCard(
             }
         );
 
-        article.appendChild(
+        content.appendChild(
             checkbox
         );
     }
@@ -1454,11 +1522,11 @@ function createEntryCard(
         name
     );
 
-    article.appendChild(
+    content.appendChild(
         entryDate
     );
 
-    article.appendChild(
+    content.appendChild(
         entryInfo
     );
 
@@ -1488,7 +1556,7 @@ function createEntryCard(
                 :
                 "Quiz";
 
-        article.appendChild(
+        content.appendChild(
             typeLabel
         );
     }
@@ -1496,12 +1564,13 @@ function createEntryCard(
 
     addSwipeActions(
         article,
+        content,
+        swipePreview,
         entry
     );
 
     return article;
 }
-
 
 // =========================
 // GROUPING
@@ -1511,6 +1580,12 @@ function sortEntriesWithinGroup(
     groupEntries
 ) {
 
+    const typePriority = {
+        exam: 0,
+        quiz: 1,
+        assignment: 1
+    };
+
     return [
         ...groupEntries
     ].sort(
@@ -1518,6 +1593,26 @@ function sortEntriesWithinGroup(
             a,
             b
         ) => {
+
+            const priorityDifference =
+                (
+                    typePriority[a.type]
+                    ??
+                    99
+                )
+                -
+                (
+                    typePriority[b.type]
+                    ??
+                    99
+                );
+
+            if (
+                priorityDifference !== 0
+            ) {
+
+                return priorityDifference;
+            }
 
             const orderDifference =
                 (
@@ -1547,7 +1642,6 @@ function sortEntriesWithinGroup(
         }
     );
 }
-
 
 function groupEntriesByDate(
     list
@@ -1742,40 +1836,28 @@ function renderAll() {
 
     updateCounts();
 
-    const openAssignments =
+    const openEntries =
         entries.filter(
             entry =>
-                entry.type === "assignment"
-                &&
-                !entry.completed
-        );
-
-    const assessments =
-        entries.filter(
-            entry =>
+                (
+                    entry.type === "assignment"
+                    &&
+                    !entry.completed
+                )
+                ||
                 isVisibleAssessment(
                     entry
                 )
         );
 
     renderGroupedEntries(
-        assignmentGroups,
-        openAssignments,
-        "No assignments right now."
+        entryGroups,
+        openEntries,
+        "No assignments, exams, or quizzes right now."
     );
-
-    renderGroupedEntries(
-        assessmentGroups,
-        assessments,
-        "No exams or quizzes coming up."
-    );
-
-    assessmentsSection.hidden =
-        assessments.length === 0;
 
     renderCompletedEntries();
 }
-
 
 // =========================
 // COMPLETED
@@ -2012,6 +2094,8 @@ async function persistOrder(
 
 function addSwipeActions(
     article,
+    content,
+    swipePreview,
     entry
 ) {
 
@@ -2100,22 +2184,52 @@ function addSwipeActions(
                 return;
             }
 
-            if (
-                deltaX
-                >
-                0
-            ) {
+            // Only allow a swipe to the RIGHT.
+            const distance =
+                Math.max(
+                    0,
+                    Math.min(
+                        deltaX,
+                        110
+                    )
+                );
 
-                article.style.transform =
-                    `translateX(${
-                        Math.min(
-                            deltaX,
-                            90
-                        )
-                    }px)`;
-            }
+            content.style.transform =
+                `translateX(${distance}px)`;
+
+            const progress =
+                Math.min(
+                    distance / 70,
+                    1
+                );
+
+            swipePreview.style.opacity =
+                String(
+                    progress
+                );
+
+            swipePreview.style.transform =
+                `translateX(${
+                    -8
+                    +
+                    progress * 8
+                }px)`;
         }
     );
+
+
+    const resetSwipe =
+        () => {
+
+            content.style.transform =
+                "";
+
+            swipePreview.style.opacity =
+                "";
+
+            swipePreview.style.transform =
+                "";
+        };
 
 
     const finishSwipe =
@@ -2144,13 +2258,10 @@ function addSwipeActions(
                 -
                 startX;
 
-            article.style.transform =
-                "";
+            resetSwipe();
 
             if (
-                deltaX
-                >=
-                65
+                deltaX >= 65
             ) {
 
                 openEntryActions(
@@ -2177,8 +2288,7 @@ function addSwipeActions(
                 "swiping"
             );
 
-            article.style.transform =
-                "";
+            resetSwipe();
 
             article.releasePointerCapture?.(
                 event.pointerId
@@ -2186,7 +2296,6 @@ function addSwipeActions(
         }
     );
 }
-
 
 // =========================
 // ACTION SHEET

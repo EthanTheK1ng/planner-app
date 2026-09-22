@@ -372,7 +372,7 @@ input {
     font-weight: 700;
 }
 
-/* Preview revealed while swiping right. */
+/* Preview revealed while swiping left. */
 .swipe-preview {
     position: absolute;
     inset: 0;
@@ -380,11 +380,11 @@ input {
 
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: flex-end;
 
     gap: 7px;
 
-    padding-left: 20px;
+    padding-right: 20px;
 
     background: #eff6ff;
     color: #2563eb;
@@ -393,7 +393,7 @@ input {
     font-weight: 700;
 
     opacity: 0;
-    transform: translateX(-8px);
+    transform: translateX(8px);
 
     pointer-events: none;
 }
@@ -526,6 +526,63 @@ input {
 
 .entry-type.quiz {
     background: #7c3aed;
+}
+
+
+/* Exams stand out as priority items within each date group. */
+.entry.exam .entry-content {
+    background:
+        linear-gradient(
+            90deg,
+            #fff7ed 0%,
+            #fffaf5 48%,
+            #ffffff 100%
+        );
+
+    border-color: #fdba74;
+    border-left-color: #f97316;
+
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(249, 115, 22, 0.08);
+}
+
+.entry.exam:hover .entry-content {
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(249, 115, 22, 0.10),
+        0 6px 18px
+        rgba(249, 115, 22, 0.10);
+}
+
+.entry.exam .entry-name {
+    font-weight: 750;
+    color: #7c2d12;
+}
+
+.entry.exam .days-until {
+    color: #c2410c;
+    font-weight: 800;
+}
+
+.entry.exam .entry-type.exam {
+    padding: 8px 12px;
+
+    border:
+        1px solid
+        #c2410c;
+
+    background: #ea580c;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: 0.35px;
+    text-transform: uppercase;
+
+    box-shadow:
+        0 3px 8px
+        rgba(234, 88, 12, 0.20);
 }
 
 

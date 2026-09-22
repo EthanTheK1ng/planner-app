@@ -140,28 +140,61 @@ input {
 ========================= */
 
 #enable-notifications-button {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
     border: 1px solid #d1d5db;
+    border-radius: 50%;
+
     background: white;
-    color: #374151;
+    color: #4b5563;
 
-    padding: 10px 14px;
+    padding: 0;
 
-    border-radius: 10px;
-
-    font-size: 14px;
-    font-weight: 600;
+    /* Hide the text visually while keeping the button text in the DOM
+       for compatibility with the existing notifications.js. */
+    font-size: 0;
 
     cursor: pointer;
+
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease,
+        opacity 0.15s ease;
+}
+
+#enable-notifications-button::before {
+    content: "🔔";
+
+    display: block;
+
+    font-size: 17px;
+    line-height: 1;
 }
 
 #enable-notifications-button:hover {
     background: #f3f4f6;
+    border-color: #cbd5e1;
+
+    transform: translateY(-1px);
+}
+
+#enable-notifications-button:active {
+    transform: translateY(0);
 }
 
 #enable-notifications-button:disabled {
-    opacity: 0.6;
+    opacity: 0.55;
     cursor: default;
+    transform: none;
 }
+
 
 
 /* =========================
@@ -529,39 +562,40 @@ input {
 }
 
 
-/* Exams stand out as priority items within each date group. */
+/* Exams use a red/rose priority treatment so they do not blend
+   with the orange "due tomorrow" assignment highlight. */
 .entry.exam .entry-content {
     background:
         linear-gradient(
             90deg,
-            #fff7ed 0%,
-            #fffaf5 48%,
+            #fff1f2 0%,
+            #fff7f7 48%,
             #ffffff 100%
         );
 
-    border-color: #fdba74;
-    border-left-color: #f97316;
+    border-color: #fda4af;
+    border-left-color: #e11d48;
 
     box-shadow:
         inset 0 0 0 1px
-        rgba(249, 115, 22, 0.08);
+        rgba(225, 29, 72, 0.08);
 }
 
 .entry.exam:hover .entry-content {
     box-shadow:
         inset 0 0 0 1px
-        rgba(249, 115, 22, 0.10),
+        rgba(225, 29, 72, 0.11),
         0 6px 18px
-        rgba(249, 115, 22, 0.10);
+        rgba(225, 29, 72, 0.11);
 }
 
 .entry.exam .entry-name {
     font-weight: 750;
-    color: #7c2d12;
+    color: #881337;
 }
 
 .entry.exam .days-until {
-    color: #c2410c;
+    color: #be123c;
     font-weight: 800;
 }
 
@@ -570,9 +604,9 @@ input {
 
     border:
         1px solid
-        #c2410c;
+        #be123c;
 
-    background: #ea580c;
+    background: #e11d48;
 
     font-size: 12px;
     font-weight: 800;
@@ -582,7 +616,65 @@ input {
 
     box-shadow:
         0 3px 8px
-        rgba(234, 88, 12, 0.20);
+        rgba(225, 29, 72, 0.22);
+}
+
+
+/* Quizzes now stand out just as strongly as exams, but with
+   their own purple treatment. */
+.entry.quiz .entry-content {
+    background:
+        linear-gradient(
+            90deg,
+            #f5f3ff 0%,
+            #faf8ff 48%,
+            #ffffff 100%
+        );
+
+    border-color: #c4b5fd;
+    border-left-color: #7c3aed;
+
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(124, 58, 237, 0.08);
+}
+
+.entry.quiz:hover .entry-content {
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(124, 58, 237, 0.11),
+        0 6px 18px
+        rgba(124, 58, 237, 0.11);
+}
+
+.entry.quiz .entry-name {
+    font-weight: 750;
+    color: #4c1d95;
+}
+
+.entry.quiz .days-until {
+    color: #6d28d9;
+    font-weight: 800;
+}
+
+.entry.quiz .entry-type.quiz {
+    padding: 8px 12px;
+
+    border:
+        1px solid
+        #6d28d9;
+
+    background: #7c3aed;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: 0.35px;
+    text-transform: uppercase;
+
+    box-shadow:
+        0 3px 8px
+        rgba(124, 58, 237, 0.22);
 }
 
 

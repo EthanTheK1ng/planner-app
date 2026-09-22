@@ -38,8 +38,8 @@ input {
     background: #f5f6f8;
 
     transition:
-        opacity 0.2s ease,
-        visibility 0.2s ease;
+        opacity 0.32s ease,
+        visibility 0.32s ease;
 }
 
 .loading-screen.hidden {
@@ -63,20 +63,28 @@ input {
 .button-spinner {
     border-radius: 50%;
     border-style: solid;
-    animation: planner-spin 0.75s linear infinite;
+
+    animation:
+        planner-spin
+        0.75s
+        linear
+        infinite;
 }
 
 .loading-spinner {
     width: 34px;
     height: 34px;
+
     border-width: 4px;
+
     border-color: #dbeafe;
     border-top-color: #2563eb;
 }
 
 @keyframes planner-spin {
     to {
-        transform: rotate(360deg);
+        transform:
+            rotate(360deg);
     }
 }
 
@@ -100,6 +108,34 @@ input {
     box-shadow:
         0 10px 30px
         rgba(0, 0, 0, 0.08);
+
+    animation:
+        planner-enter
+        0.32s
+        cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        )
+        both;
+}
+
+@keyframes planner-enter {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
 }
 
 
@@ -119,77 +155,234 @@ input {
 
 .header-left h1 {
     font-size: 30px;
+
     margin-bottom: 6px;
 }
 
 #current-date {
     color: #6b7280;
+
     font-size: 15px;
 }
 
-/* =========================================================
-   SMOOTHER UI + UPDATED COLORS
-   Paste this at the VERY BOTTOM of style.css
-========================================================= */
+.header-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
 
 
 /* =========================
-   GENERAL SMOOTH MOTION
+   NOTIFICATIONS
 ========================= */
 
-.planner {
-    animation:
-        planner-enter
-        0.32s
-        cubic-bezier(0.22, 1, 0.36, 1)
-        both;
+#enable-notifications-button {
+    width: 36px;
+    height: 36px;
+
+    flex: 0 0 36px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px solid
+        #d1d5db;
+
+    border-radius: 50%;
+
+    background: white;
+
+    color: #4b5563;
+
+    padding: 0;
+
+    font-size: 0;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease,
+        opacity 0.15s ease;
 }
 
-@keyframes planner-enter {
+#enable-notifications-button::before {
+    content: "🔔";
 
-    from {
-        opacity: 0;
-        transform:
-            translateY(8px);
-    }
+    display: block;
 
-    to {
-        opacity: 1;
-        transform:
-            translateY(0);
-    }
+    font-size: 17px;
+
+    line-height: 1;
+}
+
+#enable-notifications-button:hover {
+    background: #f3f4f6;
+
+    border-color: #cbd5e1;
+
+    transform:
+        translateY(-1px);
+}
+
+#enable-notifications-button:disabled {
+    opacity: 0.55;
+
+    cursor: default;
+
+    transform: none;
 }
 
 
-/* Entries smoothly appear */
+/* =========================
+   NEW ENTRY BUTTON
+========================= */
 
-.entry {
-    animation:
-        entry-enter
-        0.22s
-        cubic-bezier(0.22, 1, 0.36, 1)
-        both;
+#new-entry-button {
+    border: none;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    padding: 12px 20px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s
+        cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        ),
+        opacity 0.18s ease;
 }
 
-@keyframes entry-enter {
+#new-entry-button:hover {
+    background: #1d4ed8;
 
-    from {
-        opacity: 0;
-        transform:
-            translateY(6px);
-    }
+    transform:
+        translateY(-2px);
 
-    to {
-        opacity: 1;
-        transform:
-            translateY(0);
-    }
+    box-shadow:
+        0 4px 10px
+        rgba(0, 0, 0, 0.06);
 }
 
 
-/* Date groups also fade in nicely */
+/* =========================
+   SUMMARY
+========================= */
+
+.summary {
+    display: flex;
+
+    gap: 20px;
+
+    margin-bottom: 40px;
+}
+
+.summary-text {
+    flex: 1;
+
+    background: #f8fafc;
+
+    padding: 18px 20px;
+
+    border-radius: 12px;
+
+    font-size: 16px;
+
+    border:
+        1px solid
+        #e5e7eb;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.summary-text:hover {
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 4px 12px
+        rgba(0, 0, 0, 0.04);
+}
+
+.summary-text span {
+    font-weight: bold;
+
+    font-size: 19px;
+}
+
+
+/* =========================
+   SECTIONS
+========================= */
+
+.planner-section {
+    margin-top: 36px;
+}
+
+.planner-section:first-of-type {
+    margin-top: 0;
+}
+
+.section-title-row,
+.completed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    width: 100%;
+}
+
+.section-title-row h2,
+.completed-section h2 {
+    font-size: 22px;
+
+    margin-bottom: 18px;
+}
+
+#entry-groups,
+#completed-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 18px;
+}
+
+
+/* =========================
+   DATE GROUPS
+========================= */
 
 .date-group {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+
     animation:
         group-enter
         0.25s
@@ -208,62 +401,138 @@ input {
     }
 }
 
+.date-group-title {
+    color: #6b7280;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.65px;
+
+    padding: 0 2px;
+}
+
+.entry-group-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+
+    min-height: 4px;
+}
+
 
 /* =========================
-   ENTRY CARDS
+   ENTRY
 ========================= */
 
+.entry {
+    position: relative;
+
+    border-radius: 14px;
+
+    touch-action: pan-y;
+
+    overflow: hidden;
+
+    animation:
+        entry-enter
+        0.22s
+        cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        )
+        both;
+}
+
+@keyframes entry-enter {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+}
+
 .entry-content {
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+
+    gap: 18px;
+
+    width: 100%;
+
+    background: #ffffff;
+
+    border:
+        1px solid
+        #e5e7eb;
+
+    border-left:
+        6px solid
+        var(--subject-color);
+
+    padding: 16px 18px;
+
+    border-radius: 14px;
+
     transition:
         transform 0.22s
-        cubic-bezier(0.22, 1, 0.36, 1),
-
+        cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        ),
         box-shadow 0.22s ease,
-
         background-color 0.22s ease,
-
         border-color 0.22s ease,
-
         opacity 0.22s ease;
 }
 
-
 .entry:hover .entry-content {
+    box-shadow:
+        0 5px 15px
+        rgba(0, 0, 0, 0.06);
+
     transform:
         translateY(-1px);
 }
-
 
 .entry.swiping .entry-content {
     transition: none;
 }
 
-
-/* Makes the swipe preview smoothly disappear
-   after you release it */
-
-.swipe-preview {
-    transition:
-        opacity 0.16s ease,
-        transform 0.18s ease;
+.entry.sortable-ghost {
+    opacity: 0.35;
 }
 
-
-.entry.swiping .swipe-preview {
-    transition: none;
+.entry.sortable-chosen .entry-content {
+    box-shadow:
+        0 10px 25px
+        rgba(0, 0, 0, 0.12);
 }
 
 
 /* =========================
-   TOMORROW ASSIGNMENTS
+   TOMORROW ASSIGNMENT
 ========================= */
-
-/*
-   Softer peach instead of the old yellow/orange.
-   This stays visually separate from:
-   Exams = red
-   Quizzes = purple
-*/
 
 .entry.tomorrow-entry .entry-content {
     background:
@@ -274,18 +543,221 @@ input {
             #ffffff 100%
         );
 
-    border-color:
-        #f7b99a;
+    border-color: #f7b99a;
+}
+
+.entry.tomorrow-entry .days-until {
+    color: #c45f32;
+
+    font-weight: 500;
 }
 
 
-.entry.tomorrow-entry .days-until {
-    color:
-        #c45f32;
+/* =========================
+   SWIPE PREVIEW
+========================= */
 
-    /* Tomorrow should NOT be bold */
-    font-weight:
-        500;
+.swipe-preview {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 7px;
+
+    padding-right: 20px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    opacity: 0;
+
+    transform:
+        translateX(8px);
+
+    transition:
+        opacity 0.16s ease,
+        transform 0.18s ease;
+
+    pointer-events: none;
+}
+
+.swipe-preview-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 22px;
+    height: 22px;
+}
+
+.swipe-preview-icon svg {
+    width: 19px;
+    height: 19px;
+
+    fill: none;
+
+    stroke: currentColor;
+
+    stroke-width: 2;
+
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+
+/* =========================
+   DRAG HANDLE
+========================= */
+
+.drag-handle {
+    flex-shrink: 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: #9ca3af;
+
+    font-size: 20px;
+
+    line-height: 1;
+
+    cursor: grab;
+
+    padding: 7px 3px;
+
+    touch-action: none;
+
+    transition:
+        color 0.18s ease,
+        transform 0.18s ease,
+        opacity 0.18s ease;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+
+/* =========================
+   CHECKBOX
+========================= */
+
+.complete-checkbox {
+    width: 20px;
+    height: 20px;
+
+    flex-shrink: 0;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   DATE
+========================= */
+
+.entry-date {
+    min-width: 105px;
+}
+
+.days-until {
+    font-weight: 600;
+
+    font-size: 14px;
+
+    color: #374151;
+}
+
+.actual-date {
+    margin-top: 4px;
+
+    font-size: 13px;
+
+    color: #9ca3af;
+}
+
+
+/* =========================
+   ENTRY INFO
+========================= */
+
+.entry-info {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.subject-row {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 5px;
+}
+
+.subject-icon {
+    width: 20px;
+    height: 20px;
+
+    object-fit: contain;
+
+    flex-shrink: 0;
+}
+
+.entry-subject {
+    font-size: 13px;
+
+    color:
+        var(--subject-color);
+
+    font-weight: 600;
+}
+
+.entry-name {
+    font-size: 17px;
+
+    font-weight: 600;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================
+   TYPE LABEL
+========================= */
+
+.entry-type {
+    flex-shrink: 0;
+
+    color: white;
+
+    padding: 6px 10px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+}
+
+.entry-type.exam {
+    background: #e11d48;
+}
+
+.entry-type.quiz {
+    background: #7c3aed;
 }
 
 
@@ -293,23 +765,65 @@ input {
    EXAMS
 ========================= */
 
-/* Keep exams noticeable,
-   but the due-date text itself isn't bold */
+.entry.exam .entry-content {
+    background:
+        linear-gradient(
+            90deg,
+            #fff1f2 0%,
+            #fff7f7 48%,
+            #ffffff 100%
+        );
 
-.entry.exam .days-until {
-    color:
-        #be123c;
+    border-color: #fda4af;
 
-    font-weight:
-        500;
+    border-left-color: #e11d48;
+
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(225, 29, 72, 0.08);
 }
 
+.entry.exam:hover .entry-content {
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(225, 29, 72, 0.11),
 
-/* Keep the EXAM pill bold */
+        0 6px 18px
+        rgba(225, 29, 72, 0.11);
+}
+
+.entry.exam .entry-name {
+    font-weight: 750;
+
+    color: #881337;
+}
+
+.entry.exam .days-until {
+    color: #be123c;
+
+    font-weight: 500;
+}
 
 .entry.exam .entry-type.exam {
-    font-weight:
-        800;
+    padding: 8px 12px;
+
+    border:
+        1px solid
+        #be123c;
+
+    background: #e11d48;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.35px;
+
+    text-transform: uppercase;
+
+    box-shadow:
+        0 3px 8px
+        rgba(225, 29, 72, 0.22);
 }
 
 
@@ -317,127 +831,180 @@ input {
    QUIZZES
 ========================= */
 
-/* Same idea for quizzes */
+.entry.quiz .entry-content {
+    background:
+        linear-gradient(
+            90deg,
+            #f5f3ff 0%,
+            #faf8ff 48%,
+            #ffffff 100%
+        );
+
+    border-color: #c4b5fd;
+
+    border-left-color: #7c3aed;
+
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(124, 58, 237, 0.08);
+}
+
+.entry.quiz:hover .entry-content {
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(124, 58, 237, 0.11),
+
+        0 6px 18px
+        rgba(124, 58, 237, 0.11);
+}
+
+.entry.quiz .entry-name {
+    font-weight: 750;
+
+    color: #4c1d95;
+}
 
 .entry.quiz .days-until {
-    color:
-        #6d28d9;
+    color: #6d28d9;
 
-    font-weight:
-        500;
+    font-weight: 500;
 }
-
-
-/* QUIZ pill stays bold */
 
 .entry.quiz .entry-type.quiz {
-    font-weight:
-        800;
-}
+    padding: 8px 12px;
 
+    border:
+        1px solid
+        #6d28d9;
 
-/* =========================
-   BUTTONS
-========================= */
+    background: #7c3aed;
 
-#new-entry-button,
-#enable-notifications-button,
-.clear-completed-button,
-.choice-button,
-.no-due-date-button,
-.add-entry-button,
-.action-button,
-.close-button,
-.drag-handle {
+    font-size: 12px;
 
-    transition:
-        background-color 0.18s ease,
-        border-color 0.18s ease,
-        color 0.18s ease,
-        opacity 0.18s ease,
-        box-shadow 0.18s ease,
-        transform 0.18s
-        cubic-bezier(0.22, 1, 0.36, 1);
-}
+    font-weight: 800;
 
+    letter-spacing: 0.35px;
 
-/* Nice button press */
-
-#new-entry-button:active,
-#enable-notifications-button:active,
-.clear-completed-button:active,
-.choice-button:active,
-.no-due-date-button:active,
-.add-entry-button:active,
-.action-button:active {
-
-    transform:
-        scale(0.97);
-}
-
-
-/* =========================
-   CHOICE BUTTONS
-========================= */
-
-.choice-button:hover {
-    transform:
-        translateY(-2px);
+    text-transform: uppercase;
 
     box-shadow:
-        0 4px 10px
-        rgba(0, 0, 0, 0.06);
-}
-
-
-.choice-button.selected {
-    transform:
-        translateY(-1px);
+        0 3px 8px
+        rgba(124, 58, 237, 0.22);
 }
 
 
 /* =========================
-   INPUTS
+   EMPTY STATES
 ========================= */
 
-#entry-name,
-#entry-due-date {
+.empty-state,
+.completed-empty {
+    color: #9ca3af;
 
-    transition:
-        border-color 0.18s ease,
-        box-shadow 0.18s ease,
-        background-color 0.18s ease,
-        opacity 0.18s ease;
+    font-size: 14px;
+
+    padding: 10px 0;
 }
 
 
 /* =========================
-   SUMMARY BOXES
+   COMPLETED
 ========================= */
 
-.summary-text {
+.completed-section {
+    margin-top: 40px;
+}
+
+.completed-entry {
+    opacity: 0.68;
+
+    background: #f9fafb;
+
     transition:
+        opacity 0.2s ease,
         transform 0.2s ease,
-        box-shadow 0.2s ease,
-        border-color 0.2s ease;
+        background-color 0.2s ease;
 }
 
+.completed-entry .entry-name {
+    text-decoration: line-through;
 
-.summary-text:hover {
-    transform:
-        translateY(-1px);
+    color: #6b7280;
+}
 
-    box-shadow:
-        0 4px 12px
-        rgba(0, 0, 0, 0.04);
+.completed-label {
+    font-weight: 600;
+
+    font-size: 14px;
+
+    color: #16a34a;
+}
+
+.clear-completed-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: #6b7280;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    padding: 7px 11px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.15s ease,
+        opacity 0.15s ease,
+        transform 0.15s ease;
+}
+
+.clear-completed-button:hover {
+    background: #f3f4f6;
+}
+
+.clear-completed-button:disabled {
+    opacity: 0.5;
+
+    cursor: default;
 }
 
 
 /* =========================
-   ADD / EDIT ENTRY DIALOG
+   ENTRY DIALOG
 ========================= */
 
 #new-entry-dialog {
+    width: 92%;
+
+    max-width: 520px;
+
+    max-height: 88vh;
+
+    border: none;
+
+    border-radius: 18px;
+
+    padding: 0;
+
+    margin: auto;
+
+    box-shadow:
+        0 20px 60px
+        rgba(0, 0, 0, 0.2);
+
+    overflow: auto;
 
     opacity: 0;
 
@@ -449,7 +1016,12 @@ input {
         opacity 0.2s ease,
 
         transform 0.24s
-        cubic-bezier(0.22, 1, 0.36, 1),
+        cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        ),
 
         display 0.24s
         allow-discrete,
@@ -458,23 +1030,17 @@ input {
         allow-discrete;
 }
 
-
 #new-entry-dialog[open] {
-
     opacity: 1;
 
     transform:
         translateY(0)
         scale(1);
 }
-
-
-/* Starting animation when opening */
 
 @starting-style {
 
     #new-entry-dialog[open] {
-
         opacity: 0;
 
         transform:
@@ -485,60 +1051,16 @@ input {
 
 
 /* =========================
-   SWIPE ACTION MENU
-========================= */
-
-.actions-dialog {
-
-    opacity: 0;
-
-    transform:
-        translateY(14px)
-        scale(0.985);
-
-    transition:
-        opacity 0.2s ease,
-
-        transform 0.24s
-        cubic-bezier(0.22, 1, 0.36, 1),
-
-        display 0.24s
-        allow-discrete,
-
-        overlay 0.24s
-        allow-discrete;
-}
-
-
-.actions-dialog[open] {
-
-    opacity: 1;
-
-    transform:
-        translateY(0)
-        scale(1);
-}
-
-
-@starting-style {
-
-    .actions-dialog[open] {
-
-        opacity: 0;
-
-        transform:
-            translateY(14px)
-            scale(0.985);
-    }
-}
-
-
-/* =========================
-   DIALOG BACKDROPS
+   DIALOG BACKDROP
 ========================= */
 
 #new-entry-dialog::backdrop,
 .actions-dialog::backdrop {
+    background:
+        rgba(0, 0, 0, 0.4);
+
+    backdrop-filter:
+        blur(3px);
 
     opacity: 0;
 
@@ -552,62 +1074,520 @@ input {
         allow-discrete;
 }
 
-
 #new-entry-dialog[open]::backdrop,
 .actions-dialog[open]::backdrop {
-
     opacity: 1;
 }
-
 
 @starting-style {
 
     #new-entry-dialog[open]::backdrop,
     .actions-dialog[open]::backdrop {
-
         opacity: 0;
     }
 }
 
 
 /* =========================
-   LOADING SCREEN
+   FORM
 ========================= */
 
-.loading-screen {
+#new-entry-form {
+    display: flex;
+    flex-direction: column;
+
+    gap: 11px;
+
+    padding: 28px;
+}
+
+.form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 10px;
+}
+
+.form-header h2 {
+    font-size: 24px;
+}
+
+.close-button {
+    background: none;
+
+    border: none;
+
+    font-size: 28px;
+
+    color: #6b7280;
+
+    cursor: pointer;
+
+    line-height: 1;
 
     transition:
-        opacity 0.32s ease,
-        visibility 0.32s ease;
+        color 0.18s ease,
+        transform 0.18s ease,
+        opacity 0.18s ease;
+}
+
+.close-button:hover {
+    color: #111827;
+
+    transform:
+        scale(1.06);
+}
+
+#new-entry-form label {
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #4b5563;
+
+    margin-top: 7px;
 }
 
 
 /* =========================
-   COMPLETED ITEMS
+   INPUTS
 ========================= */
 
-.completed-entry {
+#entry-name,
+#entry-due-date {
+    width: 100%;
+
+    padding: 12px;
+
+    border:
+        1px solid
+        #d1d5db;
+
+    border-radius: 9px;
+
+    font-size: 16px;
+
+    background: white;
+
+    outline: none;
+
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background-color 0.18s ease,
+        opacity 0.18s ease;
+}
+
+#entry-name:focus,
+#entry-due-date:focus {
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(37, 99, 235, 0.12);
+}
+
+
+/* =========================
+   QUICK CHOICE BUTTONS
+========================= */
+
+.choice-grid {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+}
+
+.choice-button {
+    border:
+        1px solid
+        #d1d5db;
+
+    background: white;
+
+    color: #4b5563;
+
+    padding: 9px 11px;
+
+    border-radius: 10px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.18s
+        cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        ),
+
+        background-color 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        box-shadow 0.18s ease,
+        opacity 0.18s ease;
+}
+
+.choice-button:hover {
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 4px 10px
+        rgba(0, 0, 0, 0.06);
+}
+
+.choice-button.selected {
+    border-color:
+        var(--choice-color);
+
+    color:
+        var(--choice-color);
+
+    background:
+        color-mix(
+            in srgb,
+            var(--choice-color) 9%,
+            white
+        );
+
+    box-shadow:
+        0 0 0 2px
+        color-mix(
+            in srgb,
+            var(--choice-color) 15%,
+            transparent
+        );
+}
+
+.subject-choice {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+}
+
+.subject-choice img {
+    width: 17px;
+    height: 17px;
+
+    object-fit: contain;
+}
+
+
+/* =========================
+   OPTIONAL DATE
+========================= */
+
+.date-input-row {
+    display: flex;
+
+    align-items: stretch;
+
+    gap: 8px;
+}
+
+.date-input-row #entry-due-date {
+    flex: 1;
+}
+
+.no-due-date-button {
+    flex-shrink: 0;
+
+    border:
+        1px solid
+        #d1d5db;
+
+    background: white;
+
+    color: #6b7280;
+
+    border-radius: 9px;
+
+    padding: 0 12px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease,
+        opacity 0.18s ease;
+}
+
+.no-due-date-button.selected {
+    border-color: #6b7280;
+
+    background: #f3f4f6;
+
+    color: #374151;
+}
+
+#entry-due-date:disabled {
+    background: #f3f4f6;
+
+    color: #9ca3af;
+}
+
+
+/* =========================
+   ADD / SAVE BUTTON
+========================= */
+
+.add-entry-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    min-height: 44px;
+
+    margin-top: 16px;
+
+    border: none;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    padding: 13px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease,
+        opacity 0.18s ease,
+
+        transform 0.18s
+        cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        ),
+
+        box-shadow 0.18s ease;
+}
+
+.add-entry-button:hover {
+    background: #1d4ed8;
+}
+
+.add-entry-button:disabled {
+    opacity: 0.7;
+
+    cursor: wait;
+}
+
+.button-spinner {
+    display: none;
+
+    width: 17px;
+    height: 17px;
+
+    border-width: 2px;
+
+    border-color:
+        rgba(
+            255,
+            255,
+            255,
+            0.4
+        );
+
+    border-top-color: white;
+}
+
+.add-entry-button.loading
+.button-spinner {
+    display: inline-block;
+}
+
+
+/* =========================
+   SWIPE ACTION SHEET
+========================= */
+
+.actions-dialog {
+    width:
+        min(
+            92%,
+            420px
+        );
+
+    border: none;
+
+    border-radius: 18px;
+
+    padding: 0;
+
+    margin: auto;
+
+    background: transparent;
+
+    opacity: 0;
+
+    transform:
+        translateY(14px)
+        scale(0.985);
 
     transition:
         opacity 0.2s ease,
-        transform 0.2s ease,
-        background-color 0.2s ease;
+
+        transform 0.24s
+        cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        ),
+
+        display 0.24s
+        allow-discrete,
+
+        overlay 0.24s
+        allow-discrete;
+}
+
+.actions-dialog[open] {
+    opacity: 1;
+
+    transform:
+        translateY(0)
+        scale(1);
+}
+
+@starting-style {
+
+    .actions-dialog[open] {
+        opacity: 0;
+
+        transform:
+            translateY(14px)
+            scale(0.985);
+    }
+}
+
+.actions-card {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+
+    background: white;
+
+    padding: 18px;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 20px 60px
+        rgba(0, 0, 0, 0.2);
+}
+
+.actions-entry-name {
+    font-size: 14px;
+
+    font-weight: 700;
+
+    color: #374151;
+
+    padding: 4px 4px 10px;
+}
+
+.action-button {
+    border: none;
+
+    background: #f3f4f6;
+
+    color: #111827;
+
+    padding: 13px;
+
+    border-radius: 11px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease,
+        opacity 0.18s ease,
+
+        transform 0.18s
+        cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        ),
+
+        box-shadow 0.18s ease;
+}
+
+.action-button:hover {
+    background: #e5e7eb;
+}
+
+.delete-action-button {
+    color: #dc2626;
+}
+
+.cancel-action-button {
+    background: transparent;
+
+    color: #6b7280;
 }
 
 
 /* =========================
-   ACCESSIBILITY
+   BUTTON PRESS FEEDBACK
 ========================= */
 
-/* Don't force animations on people who have
-   reduced-motion enabled on their device. */
+#new-entry-button:active,
+#enable-notifications-button:active,
+.clear-completed-button:active,
+.choice-button:active,
+.no-due-date-button:active,
+.add-entry-button:active,
+.action-button:active {
+    transform:
+        scale(0.97);
+}
 
-@media (prefers-reduced-motion: reduce) {
+
+/* =========================
+   REDUCED MOTION
+========================= */
+
+@media
+(prefers-reduced-motion: reduce) {
 
     *,
     *::before,
     *::after {
-
         animation-duration:
             0.01ms !important;
 
@@ -616,5 +1596,141 @@ input {
 
         transition-duration:
             0.01ms !important;
+    }
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media
+(max-width: 650px) {
+
+    .planner {
+        width: 100%;
+
+        margin: 0;
+
+        min-height: 100vh;
+
+        border-radius: 0;
+
+        padding: 24px 18px;
+    }
+
+
+    .planner-header {
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+
+    .header-left {
+        min-width: 0;
+    }
+
+
+    .header-left h1 {
+        font-size: 23px;
+    }
+
+
+    .header-actions {
+        flex-direction:
+            column-reverse;
+
+        align-items: stretch;
+
+        gap: 7px;
+    }
+
+
+    #new-entry-button {
+        padding: 10px 13px;
+
+        font-size: 13px;
+
+        white-space: nowrap;
+    }
+
+
+    .summary {
+        flex-direction: column;
+
+        gap: 10px;
+    }
+
+
+    .entry-content {
+        gap: 11px;
+
+        padding: 14px 12px;
+    }
+
+
+    .drag-handle {
+        font-size: 18px;
+    }
+
+
+    .entry-date {
+        min-width: 72px;
+    }
+
+
+    .days-until {
+        font-size: 12px;
+    }
+
+
+    .actual-date {
+        font-size: 12px;
+    }
+
+
+    .entry-name {
+        font-size: 15px;
+    }
+
+
+    .subject-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+
+    .entry-type {
+        font-size: 9px;
+
+        padding: 5px 7px;
+    }
+
+
+    #new-entry-form {
+        padding: 23px 18px;
+    }
+
+
+    .subject-choice-grid {
+        gap: 7px;
+    }
+
+
+    .choice-button {
+        padding: 8px 9px;
+
+        font-size: 12px;
+    }
+
+
+    .date-input-row {
+        flex-direction: column;
+    }
+
+
+    .no-due-date-button {
+        padding: 10px 12px;
     }
 }

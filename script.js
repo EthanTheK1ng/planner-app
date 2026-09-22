@@ -1217,7 +1217,8 @@ function createEntryCard(
         );
 
     article.classList.add(
-        "entry"
+        "entry",
+        entry.type
     );
 
     if (
@@ -1262,7 +1263,7 @@ function createEntryCard(
     );
 
 
-    // Swipe-right preview behind the card.
+    // Swipe-left preview behind the card.
 
     const swipePreview =
         document.createElement(
@@ -1314,7 +1315,7 @@ function createEntryCard(
     );
 
 
-    // Visible card content moves right while swiping.
+    // Visible card content moves left while swiping.
 
     const content =
         document.createElement(
@@ -2089,7 +2090,7 @@ async function persistOrder(
 
 
 // =========================
-// SWIPE RIGHT ACTIONS
+// SWIPE LEFT ACTIONS
 // =========================
 
 function addSwipeActions(
@@ -2184,18 +2185,18 @@ function addSwipeActions(
                 return;
             }
 
-            // Only allow a swipe to the RIGHT.
+            // Only allow a swipe to the LEFT.
             const distance =
                 Math.max(
                     0,
                     Math.min(
-                        deltaX,
+                        -deltaX,
                         110
                     )
                 );
 
             content.style.transform =
-                `translateX(${distance}px)`;
+                `translateX(${-distance}px)`;
 
             const progress =
                 Math.min(
@@ -2210,8 +2211,8 @@ function addSwipeActions(
 
             swipePreview.style.transform =
                 `translateX(${
-                    -8
-                    +
+                    8
+                    -
                     progress * 8
                 }px)`;
         }
@@ -2261,7 +2262,7 @@ function addSwipeActions(
             resetSwipe();
 
             if (
-                deltaX >= 65
+                deltaX <= -65
             ) {
 
                 openEntryActions(

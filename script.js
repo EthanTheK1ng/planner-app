@@ -4,6 +4,9 @@
 
 let entriesRealtimeChannel = null;
 let suppressRealtimeReload = false;
+let realtimeReloadTimer = null;
+let latestLoadRequest = 0;
+let lastEntriesSignature = "";
 
 const SUPABASE_URL =
     "https://edcmnuriwutqxprzhkhz.supabase.co";
@@ -48,7 +51,6 @@ const subjectIcons = {
 // =========================
 
 let entries = [];
-
 let editingEntryId = null;
 let actionEntry = null;
 let noDueDateSelected = false;
@@ -59,172 +61,109 @@ let noDueDateSelected = false;
 // =========================
 
 const loadingScreen =
-    document.getElementById(
-        "app-loading-screen"
-    );
+    document.getElementById("app-loading-screen");
 
 const greetingText =
-    document.getElementById(
-        "greeting-text"
-    );
+    document.getElementById("greeting-text");
 
 const currentDateElement =
-    document.getElementById(
-        "current-date"
-    );
+    document.getElementById("current-date");
 
 const assignmentCountElement =
-    document.getElementById(
-        "assignment-count"
-    );
+    document.getElementById("assignment-count");
 
 const examCountElement =
-    document.getElementById(
-        "exam-count"
-    );
+    document.getElementById("exam-count");
 
 const entryGroups =
-    document.getElementById(
-        "entry-groups"
-    );
+    document.getElementById("entry-groups");
 
 const completedList =
-    document.getElementById(
-        "completed-list"
-    );
+    document.getElementById("completed-list");
 
 const clearCompletedButton =
-    document.getElementById(
-        "clear-completed-button"
-    );
+    document.getElementById("clear-completed-button");
 
 const newEntryButton =
-    document.getElementById(
-        "new-entry-button"
-    );
+    document.getElementById("new-entry-button");
 
 const newEntryDialog =
-    document.getElementById(
-        "new-entry-dialog"
-    );
+    document.getElementById("new-entry-dialog");
 
 const newEntryForm =
-    document.getElementById(
-        "new-entry-form"
-    );
+    document.getElementById("new-entry-form");
 
 const entryDialogTitle =
-    document.getElementById(
-        "entry-dialog-title"
-    );
+    document.getElementById("entry-dialog-title");
 
 const closeEntryButton =
-    document.getElementById(
-        "close-entry-button"
-    );
+    document.getElementById("close-entry-button");
 
 const entryNameInput =
-    document.getElementById(
-        "entry-name"
-    );
+    document.getElementById("entry-name");
 
 const entrySubjectInput =
-    document.getElementById(
-        "entry-subject"
-    );
+    document.getElementById("entry-subject");
 
 const subjectOptions =
-    document.getElementById(
-        "subject-options"
-    );
+    document.getElementById("subject-options");
 
 const entryTypeInput =
-    document.getElementById(
-        "entry-type"
-    );
+    document.getElementById("entry-type");
 
 const typeOptions =
-    document.getElementById(
-        "type-options"
-    );
+    document.getElementById("type-options");
 
 const entryDueDateInput =
-    document.getElementById(
-        "entry-due-date"
-    );
+    document.getElementById("entry-due-date");
 
 const noDueDateButton =
-    document.getElementById(
-        "no-due-date-button"
-    );
+    document.getElementById("no-due-date-button");
 
 const saveEntryButton =
-    document.getElementById(
-        "save-entry-button"
-    );
+    document.getElementById("save-entry-button");
 
 const saveEntryButtonText =
-    document.getElementById(
-        "save-entry-button-text"
-    );
+    document.getElementById("save-entry-button-text");
 
 const entryActionsDialog =
-    document.getElementById(
-        "entry-actions-dialog"
-    );
+    document.getElementById("entry-actions-dialog");
 
 const actionsEntryName =
-    document.getElementById(
-        "actions-entry-name"
-    );
+    document.getElementById("actions-entry-name");
 
 const editEntryButton =
-    document.getElementById(
-        "edit-entry-button"
-    );
+    document.getElementById("edit-entry-button");
 
 const deleteEntryButton =
-    document.getElementById(
-        "delete-entry-button"
-    );
+    document.getElementById("delete-entry-button");
 
 const cancelEntryActionsButton =
-    document.getElementById(
-        "cancel-entry-actions-button"
-    );
+    document.getElementById("cancel-entry-actions-button");
 
 
 // =========================
-// LOADING
+// LOADING SCREEN
 // =========================
 
 function hideLoadingScreen() {
-
-    loadingScreen.classList.add(
-        "hidden"
-    );
+    loadingScreen?.classList.add("hidden");
 }
 
 
 // =========================
-// GREETING
+// GREETING + DATE
 // =========================
 
 function showGreeting() {
-
-    const hour =
-        new Date().getHours();
+    const hour = new Date().getHours();
 
     const timeGreeting =
         hour < 12
-            ?
-            "Good morning, Ethan"
-            :
-            hour < 18
-                ?
-                "Good afternoon, Ethan"
-                :
-                "Good evening, Ethan";
+            ? "Good morning, Ethan"
+            : hour < 18
+                ? "Good afternoon, Ethan"
+                : "Good evening, Ethan";
 
     const greetings = [
         "Welcome, Ethan",
@@ -238,35 +177,20 @@ function showGreeting() {
     greetingText.textContent =
         greetings[
             Math.floor(
-                Math.random()
-                *
-                greetings.length
+                Math.random() * greetings.length
             )
         ];
 }
 
 
-// =========================
-// CURRENT DATE
-// =========================
-
 function showCurrentDate() {
-
-    const today =
-        new Date();
-
     currentDateElement.textContent =
-        today.toLocaleDateString(
+        new Date().toLocaleDateString(
             "en-US",
             {
-                weekday:
-                    "long",
-
-                month:
-                    "long",
-
-                day:
-                    "numeric"
+                weekday: "long",
+                month: "long",
+                day: "numeric"
             }
         );
 }
@@ -276,25 +200,13 @@ function showCurrentDate() {
 // DATE HELPERS
 // =========================
 
-function parseDate(
-    dateString
-) {
-
-    if (
-        !dateString
-    ) {
-
+function parseDate(dateString) {
+    if (!dateString) {
         return null;
     }
 
-    const [
-        year,
-        month,
-        day
-    ] =
-        dateString.split(
-            "-"
-        );
+    const [year, month, day] =
+        dateString.split("-");
 
     return new Date(
         Number(year),
@@ -304,19 +216,12 @@ function parseDate(
 }
 
 
-function getDaysUntilDue(
-    dueDate
-) {
-
-    if (
-        !dueDate
-    ) {
-
+function getDaysUntilDue(dueDate) {
+    if (!dueDate) {
         return null;
     }
 
-    const today =
-        new Date();
+    const today = new Date();
 
     today.setHours(
         0,
@@ -326,9 +231,7 @@ function getDaysUntilDue(
     );
 
     const due =
-        parseDate(
-            dueDate
-        );
+        parseDate(dueDate);
 
     due.setHours(
         0,
@@ -358,21 +261,13 @@ function getDaysUntilDue(
 }
 
 
-function formatShortDate(
-    dateString
-) {
-
-    if (
-        !dateString
-    ) {
-
+function formatShortDate(dateString) {
+    if (!dateString) {
         return "No date";
     }
 
     const date =
-        parseDate(
-            dateString
-        );
+        parseDate(dateString);
 
     return `${
         date.getMonth() + 1
@@ -382,14 +277,8 @@ function formatShortDate(
 }
 
 
-function getDueText(
-    dateString
-) {
-
-    if (
-        !dateString
-    ) {
-
+function getDueText(dateString) {
+    if (!dateString) {
         return "No due date";
     }
 
@@ -401,21 +290,18 @@ function getDueText(
     if (
         daysUntilDue === 0
     ) {
-
         return "Today";
     }
 
     if (
         daysUntilDue === 1
     ) {
-
         return "Tomorrow";
     }
 
     if (
         daysUntilDue < 0
     ) {
-
         return "Overdue";
     }
 
@@ -428,20 +314,16 @@ function getDueText(
 function formatGroupTitle(
     dateString
 ) {
-
     if (
         !dateString
         ||
         dateString === "none"
     ) {
-
         return "No Due Date";
     }
 
     const date =
-        parseDate(
-            dateString
-        );
+        parseDate(dateString);
 
     const daysUntil =
         getDaysUntilDue(
@@ -452,46 +334,35 @@ function formatGroupTitle(
         date.toLocaleDateString(
             "en-US",
             {
-                month:
-                    "short",
-
-                day:
-                    "numeric"
+                month: "short",
+                day: "numeric"
             }
         );
 
     if (
         daysUntil === 0
     ) {
-
         return `Today · ${dateText}`;
     }
 
     if (
         daysUntil === 1
     ) {
-
         return `Tomorrow · ${dateText}`;
     }
 
     if (
         daysUntil < 0
     ) {
-
         return `Overdue · ${dateText}`;
     }
 
     return date.toLocaleDateString(
         "en-US",
         {
-            weekday:
-                "long",
-
-            month:
-                "short",
-
-            day:
-                "numeric"
+            weekday: "long",
+            month: "short",
+            day: "numeric"
         }
     );
 }
@@ -501,7 +372,13 @@ function formatGroupTitle(
 // LOAD DATA
 // =========================
 
-async function loadEntries() {
+async function loadEntries(
+    {
+        silent = false
+    } = {}
+) {
+    const requestId =
+        ++latestLoadRequest;
 
     const {
         data,
@@ -517,38 +394,60 @@ async function loadEntries() {
             .order(
                 "due_date",
                 {
-                    ascending:
-                        true,
-
-                    nullsFirst:
-                        false
+                    ascending: true,
+                    nullsFirst: false
                 }
             )
             .order(
                 "sort_order",
                 {
-                    ascending:
-                        true
+                    ascending: true
+                }
+            )
+            .order(
+                "id",
+                {
+                    ascending: true
                 }
             );
 
     if (
         error
     ) {
-
         console.error(
             "Error loading entries:",
             error
         );
 
-        alert(
-            "There was a problem loading your planner."
-        );
+        if (
+            !silent
+        ) {
+            alert(
+                "There was a problem loading your planner."
+            );
+        }
 
         return false;
     }
 
-    entries =
+    /*
+        If a newer load started while this
+        request was running, ignore this older
+        result.
+
+        This stops old responses from
+        overwriting newer planner data.
+    */
+
+    if (
+        requestId
+        !==
+        latestLoadRequest
+    ) {
+        return true;
+    }
+
+    const newEntries =
         data.map(
             entry => ({
                 id:
@@ -576,7 +475,33 @@ async function loadEntries() {
             })
         );
 
-    renderAll();
+    /*
+        Supabase Realtime can fire after the app
+        already loaded the same change.
+
+        Only redraw if the actual data changed.
+        This stops the entries from repeatedly
+        refreshing and replaying their animation.
+    */
+
+    const newEntriesSignature =
+        JSON.stringify(
+            newEntries
+        );
+
+    entries =
+        newEntries;
+
+    if (
+        newEntriesSignature
+        !==
+        lastEntriesSignature
+    ) {
+        lastEntriesSignature =
+            newEntriesSignature;
+
+        renderAll();
+    }
 
     return true;
 }
@@ -587,14 +512,23 @@ async function loadEntries() {
 // =========================
 
 function subscribeToEntryChanges() {
-
     if (
         entriesRealtimeChannel
     ) {
-
         supabaseClient.removeChannel(
             entriesRealtimeChannel
         );
+    }
+
+    if (
+        realtimeReloadTimer
+    ) {
+        clearTimeout(
+            realtimeReloadTimer
+        );
+
+        realtimeReloadTimer =
+            null;
     }
 
     entriesRealtimeChannel =
@@ -614,26 +548,45 @@ function subscribeToEntryChanges() {
                     table:
                         "entries"
                 },
-                async payload => {
-
-                    console.log(
-                        "Homework changed:",
-                        payload
-                    );
-
+                () => {
                     if (
                         suppressRealtimeReload
                     ) {
-
                         return;
                     }
 
-                    await loadEntries();
+                    /*
+                        One action can produce multiple
+                        realtime events.
+
+                        Every event resets this timer,
+                        so a burst becomes one refresh.
+                    */
+
+                    if (
+                        realtimeReloadTimer
+                    ) {
+                        clearTimeout(
+                            realtimeReloadTimer
+                        );
+                    }
+
+                    realtimeReloadTimer =
+                        setTimeout(
+                            async () => {
+                                realtimeReloadTimer =
+                                    null;
+
+                                await loadEntries({
+                                    silent: true
+                                });
+                            },
+                            180
+                        );
                 }
             )
             .subscribe(
                 status => {
-
                     console.log(
                         "Realtime status:",
                         status
@@ -644,7 +597,7 @@ function subscribeToEntryChanges() {
 
 
 // =========================
-// DATABASE WRITES
+// DATABASE HELPERS
 // =========================
 
 function sameGroup(
@@ -652,9 +605,10 @@ function sameGroup(
     type,
     dueDate
 ) {
-
     return (
-        entry.type === type
+        entry.type
+        ===
+        type
         &&
         (
             entry.dueDate
@@ -675,7 +629,6 @@ function getNextSortOrder(
     type,
     dueDate
 ) {
-
     const matchingEntries =
         entries.filter(
             entry =>
@@ -687,9 +640,10 @@ function getNextSortOrder(
         );
 
     if (
-        matchingEntries.length === 0
+        matchingEntries.length
+        ===
+        0
     ) {
-
         return 0;
     }
 
@@ -708,10 +662,13 @@ function getNextSortOrder(
 }
 
 
+// =========================
+// ADD ENTRY
+// =========================
+
 async function addEntryToDatabase(
     newEntry
 ) {
-
     const {
         error
     } =
@@ -747,7 +704,6 @@ async function addEntryToDatabase(
     if (
         error
     ) {
-
         console.error(
             "Could not add entry:",
             error
@@ -766,11 +722,14 @@ async function addEntryToDatabase(
 }
 
 
+// =========================
+// UPDATE ENTRY
+// =========================
+
 async function updateEntryInDatabase(
     entry,
     updatedEntry
 ) {
-
     const movedGroups =
         !sameGroup(
             entry,
@@ -821,7 +780,6 @@ async function updateEntryInDatabase(
     if (
         error
     ) {
-
         console.error(
             "Could not update entry:",
             error
@@ -840,10 +798,13 @@ async function updateEntryInDatabase(
 }
 
 
+// =========================
+// COMPLETE ENTRY
+// =========================
+
 async function completeEntry(
     entry
 ) {
-
     const {
         error
     } =
@@ -865,7 +826,6 @@ async function completeEntry(
     if (
         error
     ) {
-
         console.error(
             "Could not complete entry:",
             error
@@ -884,10 +844,13 @@ async function completeEntry(
 }
 
 
+// =========================
+// RESTORE ENTRY
+// =========================
+
 async function restoreEntry(
     entry
 ) {
-
     const {
         error
     } =
@@ -909,7 +872,6 @@ async function restoreEntry(
     if (
         error
     ) {
-
         console.error(
             "Could not restore entry:",
             error
@@ -928,10 +890,13 @@ async function restoreEntry(
 }
 
 
+// =========================
+// DELETE ENTRY
+// =========================
+
 async function deleteEntry(
     entry
 ) {
-
     const {
         error
     } =
@@ -948,7 +913,6 @@ async function deleteEntry(
     if (
         error
     ) {
-
         console.error(
             "Could not delete entry:",
             error
@@ -967,20 +931,26 @@ async function deleteEntry(
 }
 
 
-async function clearCompletedAssignments() {
+// =========================
+// CLEAR COMPLETED
+// =========================
 
+async function clearCompletedAssignments() {
     const completedAssignments =
         entries.filter(
             entry =>
-                entry.type === "assignment"
+                entry.type
+                ===
+                "assignment"
                 &&
                 entry.completed
         );
 
     if (
-        completedAssignments.length === 0
+        completedAssignments.length
+        ===
+        0
     ) {
-
         return;
     }
 
@@ -1010,7 +980,6 @@ async function clearCompletedAssignments() {
     if (
         error
     ) {
-
         console.error(
             "Could not clear completed assignments:",
             error
@@ -1046,20 +1015,21 @@ async function clearCompletedAssignments() {
 function isVisibleAssessment(
     entry
 ) {
-
     if (
-        entry.type !== "exam"
+        entry.type
+        !==
+        "exam"
         &&
-        entry.type !== "quiz"
+        entry.type
+        !==
+        "quiz"
     ) {
-
         return false;
     }
 
     if (
         !entry.dueDate
     ) {
-
         return true;
     }
 
@@ -1074,11 +1044,12 @@ function isVisibleAssessment(
 
 
 function updateCounts() {
-
     const assignments =
         entries.filter(
             entry =>
-                entry.type === "assignment"
+                entry.type
+                ===
+                "assignment"
                 &&
                 !entry.completed
         );
@@ -1097,31 +1068,29 @@ function updateCounts() {
     examCountElement.textContent =
         assessments.length;
 
-    const assignmentText =
-        assignments.length === 1
-            ?
-            "assignment to complete"
-            :
-            "assignments to complete";
-
     assignmentCountElement
         .parentElement
         .lastChild
         .textContent =
-            ` ${assignmentText}`;
-
-    const assessmentText =
-        assessments.length === 1
-            ?
-            "exam/quiz coming up"
-            :
-            "exams/quizzes coming up";
+            assignments.length
+            ===
+            1
+                ?
+                " assignment to complete"
+                :
+                " assignments to complete";
 
     examCountElement
         .parentElement
         .lastChild
         .textContent =
-            ` ${assessmentText}`;
+            assessments.length
+            ===
+            1
+                ?
+                " exam/quiz coming up"
+                :
+                " exams/quizzes coming up";
 }
 
 
@@ -1132,7 +1101,6 @@ function updateCounts() {
 function createSubjectRow(
     entry
 ) {
-
     const subjectRow =
         document.createElement(
             "div"
@@ -1166,7 +1134,6 @@ function createSubjectRow(
     icon.addEventListener(
         "error",
         () => {
-
             icon.style.display =
                 "none";
         }
@@ -1204,10 +1171,12 @@ function createEntryCard(
     entry,
     options = {}
 ) {
-
     const {
-        completedView = false,
-        draggable = false
+        completedView =
+            false,
+
+        draggable =
+            false
     } =
         options;
 
@@ -1221,16 +1190,24 @@ function createEntryCard(
         entry.type
     );
 
+    /*
+        Only normal assignments due tomorrow
+        receive the tomorrow highlight.
+    */
+
     if (
         !completedView
         &&
-        entry.type === "assignment"
+        entry.type
+        ===
+        "assignment"
         &&
         getDaysUntilDue(
             entry.dueDate
-        ) === 1
+        )
+        ===
+        1
     ) {
-
         article.classList.add(
             "tomorrow-entry"
         );
@@ -1239,7 +1216,6 @@ function createEntryCard(
     if (
         completedView
     ) {
-
         article.classList.add(
             "completed-entry"
         );
@@ -1263,7 +1239,9 @@ function createEntryCard(
     );
 
 
-    // Swipe-left preview behind the card.
+    // =========================
+    // SWIPE PREVIEW
+    // =========================
 
     const swipePreview =
         document.createElement(
@@ -1315,7 +1293,9 @@ function createEntryCard(
     );
 
 
-    // Visible card content moves left while swiping.
+    // =========================
+    // CARD CONTENT
+    // =========================
 
     const content =
         document.createElement(
@@ -1331,12 +1311,13 @@ function createEntryCard(
     );
 
 
-    // Drag handle
+    // =========================
+    // DRAG HANDLE
+    // =========================
 
     if (
         draggable
     ) {
-
         const dragHandle =
             document.createElement(
                 "button"
@@ -1366,12 +1347,15 @@ function createEntryCard(
     }
 
 
-    // Assignment checkbox
+    // =========================
+    // ASSIGNMENT CHECKBOX
+    // =========================
 
     if (
-        entry.type === "assignment"
+        entry.type
+        ===
+        "assignment"
     ) {
-
         const checkbox =
             document.createElement(
                 "input"
@@ -1395,7 +1379,6 @@ function createEntryCard(
         checkbox.addEventListener(
             "change",
             async () => {
-
                 checkbox.disabled =
                     true;
 
@@ -1413,7 +1396,6 @@ function createEntryCard(
                 if (
                     !success
                 ) {
-
                     checkbox.checked =
                         Boolean(
                             entry.completed
@@ -1431,7 +1413,9 @@ function createEntryCard(
     }
 
 
-    // Date
+    // =========================
+    // DATE
+    // =========================
 
     const entryDate =
         document.createElement(
@@ -1487,7 +1471,9 @@ function createEntryCard(
     );
 
 
-    // Main info
+    // =========================
+    // ENTRY INFO
+    // =========================
 
     const entryInfo =
         document.createElement(
@@ -1532,14 +1518,19 @@ function createEntryCard(
     );
 
 
-    // Exam / quiz label
+    // =========================
+    // EXAM / QUIZ LABEL
+    // =========================
 
     if (
-        entry.type === "exam"
+        entry.type
+        ===
+        "exam"
         ||
-        entry.type === "quiz"
+        entry.type
+        ===
+        "quiz"
     ) {
-
         const typeLabel =
             document.createElement(
                 "span"
@@ -1551,7 +1542,9 @@ function createEntryCard(
         );
 
         typeLabel.textContent =
-            entry.type === "exam"
+            entry.type
+            ===
+            "exam"
                 ?
                 "Exam"
                 :
@@ -1573,13 +1566,20 @@ function createEntryCard(
     return article;
 }
 
+
 // =========================
-// GROUPING
+// SORTING
 // =========================
 
 function sortEntriesWithinGroup(
     groupEntries
 ) {
+    /*
+        Exams always stay at the top.
+
+        Quizzes and assignments are mixed
+        underneath according to drag order.
+    */
 
     const typePriority = {
         exam: 0,
@@ -1594,24 +1594,28 @@ function sortEntriesWithinGroup(
             a,
             b
         ) => {
-
             const priorityDifference =
                 (
-                    typePriority[a.type]
+                    typePriority[
+                        a.type
+                    ]
                     ??
                     99
                 )
                 -
                 (
-                    typePriority[b.type]
+                    typePriority[
+                        b.type
+                    ]
                     ??
                     99
                 );
 
             if (
-                priorityDifference !== 0
+                priorityDifference
+                !==
+                0
             ) {
-
                 return priorityDifference;
             }
 
@@ -1629,31 +1633,39 @@ function sortEntriesWithinGroup(
                 );
 
             if (
-                orderDifference !== 0
+                orderDifference
+                !==
+                0
             ) {
-
                 return orderDifference;
             }
 
             return (
-                Number(a.id)
+                Number(
+                    a.id
+                )
                 -
-                Number(b.id)
+                Number(
+                    b.id
+                )
             );
         }
     );
 }
 
+
+// =========================
+// GROUP BY DATE
+// =========================
+
 function groupEntriesByDate(
     list
 ) {
-
     const groups =
         new Map();
 
     list.forEach(
         entry => {
-
             const key =
                 entry.dueDate
                 ||
@@ -1664,7 +1676,6 @@ function groupEntriesByDate(
                     key
                 )
             ) {
-
                 groups.set(
                     key,
                     []
@@ -1688,18 +1699,19 @@ function groupEntriesByDate(
             [keyA],
             [keyB]
         ) => {
-
             if (
-                keyA === "none"
+                keyA
+                ===
+                "none"
             ) {
-
                 return 1;
             }
 
             if (
-                keyB === "none"
+                keyB
+                ===
+                "none"
             ) {
-
                 return -1;
             }
 
@@ -1711,19 +1723,23 @@ function groupEntriesByDate(
 }
 
 
+// =========================
+// RENDER GROUPS
+// =========================
+
 function renderGroupedEntries(
     container,
     list,
     emptyMessage
 ) {
-
     container.innerHTML =
         "";
 
     if (
-        list.length === 0
+        list.length
+        ===
+        0
     ) {
-
         const empty =
             document.createElement(
                 "p"
@@ -1755,7 +1771,6 @@ function renderGroupedEntries(
                 groupEntries
             ]
         ) => {
-
             const group =
                 document.createElement(
                     "section"
@@ -1796,7 +1811,6 @@ function renderGroupedEntries(
             )
                 .forEach(
                     entry => {
-
                         listElement.appendChild(
                             createEntryCard(
                                 entry,
@@ -1830,18 +1844,19 @@ function renderGroupedEntries(
 
 
 // =========================
-// RENDER ALL
+// RENDER EVERYTHING
 // =========================
 
 function renderAll() {
-
     updateCounts();
 
     const openEntries =
         entries.filter(
             entry =>
                 (
-                    entry.type === "assignment"
+                    entry.type
+                    ===
+                    "assignment"
                     &&
                     !entry.completed
                 )
@@ -1860,34 +1875,39 @@ function renderAll() {
     renderCompletedEntries();
 }
 
+
 // =========================
-// COMPLETED
+// COMPLETED ASSIGNMENTS
 // =========================
 
 function renderCompletedEntries() {
-
     completedList.innerHTML =
         "";
 
     const completedAssignments =
         entries.filter(
             entry =>
-                entry.type === "assignment"
+                entry.type
+                ===
+                "assignment"
                 &&
                 entry.completed
         );
 
     clearCompletedButton.style.display =
-        completedAssignments.length === 0
+        completedAssignments.length
+        ===
+        0
             ?
             "none"
             :
             "inline-flex";
 
     if (
-        completedAssignments.length === 0
+        completedAssignments.length
+        ===
+        0
     ) {
-
         const emptyMessage =
             document.createElement(
                 "p"
@@ -1912,7 +1932,6 @@ function renderCompletedEntries() {
     )
         .forEach(
             entry => {
-
                 completedList.appendChild(
                     createEntryCard(
                         entry,
@@ -1937,12 +1956,11 @@ function renderCompletedEntries() {
 function initializeSortables(
     root
 ) {
-
     if (
-        typeof Sortable ===
+        typeof Sortable
+        ===
         "undefined"
     ) {
-
         console.warn(
             "SortableJS did not load, so drag-to-reorder is unavailable."
         );
@@ -1955,7 +1973,6 @@ function initializeSortables(
     )
         .forEach(
             listElement => {
-
                 Sortable.create(
                     listElement,
                     {
@@ -1973,7 +1990,6 @@ function initializeSortables(
 
                         onEnd:
                             async () => {
-
                                 await persistOrder(
                                     listElement
                                 );
@@ -1985,29 +2001,31 @@ function initializeSortables(
 }
 
 
+// =========================
+// SAVE DRAG ORDER
+// =========================
+
 async function persistOrder(
     listElement
 ) {
-
     const cards =
         [
-            ...listElement.querySelectorAll(
-                ".entry[data-entry-id]"
-            )
+            ...listElement
+                .querySelectorAll(
+                    ".entry[data-entry-id]"
+                )
         ];
 
     suppressRealtimeReload =
         true;
 
     try {
-
         const updates =
             cards.map(
                 (
                     card,
                     index
                 ) => {
-
                     const id =
                         Number(
                             card.dataset.entryId
@@ -2026,7 +2044,6 @@ async function persistOrder(
                     if (
                         localEntry
                     ) {
-
                         localEntry.sortOrder =
                             index;
                     }
@@ -2062,14 +2079,12 @@ async function persistOrder(
         if (
             failed
         ) {
-
             throw failed.error;
         }
 
     } catch (
         error
     ) {
-
         console.error(
             "Could not save entry order:",
             error
@@ -2080,7 +2095,6 @@ async function persistOrder(
         );
 
     } finally {
-
         suppressRealtimeReload =
             false;
 
@@ -2090,7 +2104,7 @@ async function persistOrder(
 
 
 // =========================
-// SWIPE LEFT ACTIONS
+// SWIPE LEFT
 // =========================
 
 function addSwipeActions(
@@ -2099,29 +2113,19 @@ function addSwipeActions(
     swipePreview,
     entry
 ) {
-
-    let startX =
-        0;
-
-    let startY =
-        0;
-
-    let currentX =
-        0;
-
-    let tracking =
-        false;
+    let startX = 0;
+    let startY = 0;
+    let currentX = 0;
+    let tracking = false;
 
     article.addEventListener(
         "pointerdown",
         event => {
-
             if (
                 event.target.closest(
                     "button, input"
                 )
             ) {
-
                 return;
             }
 
@@ -2151,11 +2155,9 @@ function addSwipeActions(
     article.addEventListener(
         "pointermove",
         event => {
-
             if (
                 !tracking
             ) {
-
                 return;
             }
 
@@ -2181,11 +2183,9 @@ function addSwipeActions(
                     deltaX
                 )
             ) {
-
                 return;
             }
 
-            // Only allow a swipe to the LEFT.
             const distance =
                 Math.max(
                     0,
@@ -2196,11 +2196,15 @@ function addSwipeActions(
                 );
 
             content.style.transform =
-                `translateX(${-distance}px)`;
+                `translateX(${
+                    -distance
+                }px)`;
 
             const progress =
                 Math.min(
-                    distance / 70,
+                    distance
+                    /
+                    70,
                     1
                 );
 
@@ -2219,57 +2223,55 @@ function addSwipeActions(
     );
 
 
-    const resetSwipe =
-        () => {
+    function resetSwipe() {
+        content.style.transform =
+            "";
 
-            content.style.transform =
-                "";
+        swipePreview.style.opacity =
+            "";
 
-            swipePreview.style.opacity =
-                "";
-
-            swipePreview.style.transform =
-                "";
-        };
+        swipePreview.style.transform =
+            "";
+    }
 
 
-    const finishSwipe =
-        event => {
+    function finishSwipe(
+        event
+    ) {
+        if (
+            !tracking
+        ) {
+            return;
+        }
 
-            if (
-                !tracking
-            ) {
+        tracking =
+            false;
 
-                return;
-            }
+        article.classList.remove(
+            "swiping"
+        );
 
-            tracking =
-                false;
+        article.releasePointerCapture?.(
+            event.pointerId
+        );
 
-            article.classList.remove(
-                "swiping"
+        const deltaX =
+            currentX
+            -
+            startX;
+
+        resetSwipe();
+
+        if (
+            deltaX
+            <=
+            -65
+        ) {
+            openEntryActions(
+                entry
             );
-
-            article.releasePointerCapture?.(
-                event.pointerId
-            );
-
-            const deltaX =
-                currentX
-                -
-                startX;
-
-            resetSwipe();
-
-            if (
-                deltaX <= -65
-            ) {
-
-                openEntryActions(
-                    entry
-                );
-            }
-        };
+        }
+    }
 
 
     article.addEventListener(
@@ -2281,7 +2283,6 @@ function addSwipeActions(
     article.addEventListener(
         "pointercancel",
         event => {
-
             tracking =
                 false;
 
@@ -2298,14 +2299,14 @@ function addSwipeActions(
     );
 }
 
+
 // =========================
-// ACTION SHEET
+// ENTRY ACTIONS
 // =========================
 
 function openEntryActions(
     entry
 ) {
-
     actionEntry =
         entry;
 
@@ -2317,14 +2318,12 @@ function openEntryActions(
 
 
 function closeEntryActions() {
-
     actionEntry =
         null;
 
     if (
         entryActionsDialog.open
     ) {
-
         entryActionsDialog.close();
     }
 }
@@ -2333,11 +2332,9 @@ function closeEntryActions() {
 editEntryButton.addEventListener(
     "click",
     () => {
-
         if (
             !actionEntry
         ) {
-
             return;
         }
 
@@ -2356,11 +2353,9 @@ editEntryButton.addEventListener(
 deleteEntryButton.addEventListener(
     "click",
     async () => {
-
         if (
             !actionEntry
         ) {
-
             return;
         }
 
@@ -2370,14 +2365,19 @@ deleteEntryButton.addEventListener(
         deleteEntryButton.disabled =
             true;
 
-        await deleteEntry(
-            entryToDelete
-        );
+        const success =
+            await deleteEntry(
+                entryToDelete
+            );
 
         deleteEntryButton.disabled =
             false;
 
-        closeEntryActions();
+        if (
+            success
+        ) {
+            closeEntryActions();
+        }
     }
 );
 
@@ -2389,7 +2389,7 @@ cancelEntryActionsButton.addEventListener(
 
 
 // =========================
-// FORM CHOICE BUTTONS
+// CHOICE BUTTON HELPER
 // =========================
 
 function selectChoice(
@@ -2397,13 +2397,11 @@ function selectChoice(
     buttons,
     value
 ) {
-
     hiddenInput.value =
         value;
 
     buttons.forEach(
         button => {
-
             const selected =
                 button.dataset.value
                 ===
@@ -2425,8 +2423,11 @@ function selectChoice(
 }
 
 
-function buildSubjectButtons() {
+// =========================
+// SUBJECT BUTTONS
+// =========================
 
+function buildSubjectButtons() {
     subjectOptions.innerHTML =
         "";
 
@@ -2435,7 +2436,6 @@ function buildSubjectButtons() {
     )
         .forEach(
             subject => {
-
                 const button =
                     document.createElement(
                         "button"
@@ -2477,7 +2477,6 @@ function buildSubjectButtons() {
                 icon.addEventListener(
                     "error",
                     () => {
-
                         icon.style.display =
                             "none";
                     }
@@ -2502,7 +2501,6 @@ function buildSubjectButtons() {
                 button.addEventListener(
                     "click",
                     () => {
-
                         selectChoice(
                             entrySubjectInput,
                             [
@@ -2524,17 +2522,19 @@ function buildSubjectButtons() {
 }
 
 
+// =========================
+// TYPE BUTTONS
+// =========================
+
 typeOptions
     .querySelectorAll(
         ".type-choice"
     )
     .forEach(
         button => {
-
             button.addEventListener(
                 "click",
                 () => {
-
                     selectChoice(
                         entryTypeInput,
                         [
@@ -2558,7 +2558,6 @@ typeOptions
 function setNoDueDate(
     selected
 ) {
-
     noDueDateSelected =
         selected;
 
@@ -2580,7 +2579,6 @@ function setNoDueDate(
     if (
         selected
     ) {
-
         entryDueDateInput.value =
             "";
     }
@@ -2590,7 +2588,6 @@ function setNoDueDate(
 noDueDateButton.addEventListener(
     "click",
     () => {
-
         setNoDueDate(
             !noDueDateSelected
         );
@@ -2601,11 +2598,9 @@ noDueDateButton.addEventListener(
 entryDueDateInput.addEventListener(
     "change",
     () => {
-
         if (
             entryDueDateInput.value
         ) {
-
             setNoDueDate(
                 false
             );
@@ -2615,11 +2610,10 @@ entryDueDateInput.addEventListener(
 
 
 // =========================
-// ADD / EDIT DIALOG
+// FORM HELPERS
 // =========================
 
 function getFirstSubject() {
-
     return Object.keys(
         subjectColors
     )[0];
@@ -2627,7 +2621,6 @@ function getFirstSubject() {
 
 
 function resetEntryForm() {
-
     editingEntryId =
         null;
 
@@ -2670,15 +2663,17 @@ function resetEntryForm() {
 }
 
 
-function openNewEntryDialog() {
+// =========================
+// OPEN NEW ENTRY
+// =========================
 
+function openNewEntryDialog() {
     resetEntryForm();
 
     newEntryDialog.showModal();
 
     setTimeout(
         () => {
-
             entryNameInput.focus();
         },
         0
@@ -2686,15 +2681,16 @@ function openNewEntryDialog() {
 }
 
 
+// =========================
+// OPEN EDIT ENTRY
+// =========================
+
 function openEditEntryDialog(
     entry
 ) {
-
     editingEntryId =
         entry.id;
 
-    // Existing entries can have past dates,
-    // so don't apply the "today" minimum while editing.
     entryDueDateInput.removeAttribute(
         "min"
     );
@@ -2733,7 +2729,6 @@ function openEditEntryDialog(
     if (
         entry.dueDate
     ) {
-
         setNoDueDate(
             false
         );
@@ -2742,7 +2737,6 @@ function openEditEntryDialog(
             entry.dueDate;
 
     } else {
-
         setNoDueDate(
             true
         );
@@ -2752,7 +2746,6 @@ function openEditEntryDialog(
 
     setTimeout(
         () => {
-
             entryNameInput.focus();
 
             entryNameInput.select();
@@ -2762,20 +2755,26 @@ function openEditEntryDialog(
 }
 
 
+// =========================
+// NEW ENTRY BUTTON
+// =========================
+
 newEntryButton.addEventListener(
     "click",
     openNewEntryDialog
 );
 
 
+// =========================
+// CLOSE DIALOG
+// =========================
+
 closeEntryButton.addEventListener(
     "click",
     () => {
-
         if (
             !saveEntryButton.disabled
         ) {
-
             newEntryDialog.close();
         }
     }
@@ -2783,13 +2782,12 @@ closeEntryButton.addEventListener(
 
 
 // =========================
-// FORM LOADING STATE
+// FORM LOADING
 // =========================
 
 function setFormLoading(
     loading
 ) {
-
     saveEntryButton.disabled =
         loading;
 
@@ -2801,7 +2799,6 @@ function setFormLoading(
     if (
         loading
     ) {
-
         saveEntryButtonText.textContent =
             editingEntryId
                 ?
@@ -2810,7 +2807,6 @@ function setFormLoading(
                 "Adding…";
 
     } else {
-
         saveEntryButtonText.textContent =
             editingEntryId
                 ?
@@ -2828,7 +2824,6 @@ function setFormLoading(
 newEntryForm.addEventListener(
     "submit",
     async event => {
-
         event.preventDefault();
 
         const name =
@@ -2850,7 +2845,8 @@ newEntryForm.addEventListener(
                 null
                 :
                 (
-                    entryDueDateInput.value
+                    entryDueDateInput
+                        .value
                     ||
                     null
                 );
@@ -2862,7 +2858,6 @@ newEntryForm.addEventListener(
             ||
             !type
         ) {
-
             return;
         }
 
@@ -2883,7 +2878,6 @@ newEntryForm.addEventListener(
         if (
             editingEntryId
         ) {
-
             const existingEntry =
                 entries.find(
                     entry =>
@@ -2899,7 +2893,6 @@ newEntryForm.addEventListener(
             if (
                 existingEntry
             ) {
-
                 success =
                     await updateEntryInDatabase(
                         existingEntry,
@@ -2908,7 +2901,6 @@ newEntryForm.addEventListener(
             }
 
         } else {
-
             success =
                 await addEntryToDatabase(
                     entryData
@@ -2922,7 +2914,6 @@ newEntryForm.addEventListener(
         if (
             success
         ) {
-
             newEntryDialog.close();
 
             resetEntryForm();
@@ -2932,7 +2923,7 @@ newEntryForm.addEventListener(
 
 
 // =========================
-// CLEAR COMPLETED
+// CLEAR COMPLETED BUTTON
 // =========================
 
 clearCompletedButton.addEventListener(
@@ -2942,11 +2933,10 @@ clearCompletedButton.addEventListener(
 
 
 // =========================
-// TODAY FOR INPUT
+// TODAY FOR DATE INPUT
 // =========================
 
 function getTodayForInput() {
-
     const today =
         new Date();
 
@@ -2955,7 +2945,9 @@ function getTodayForInput() {
 
     const month =
         String(
-            today.getMonth() + 1
+            today.getMonth()
+            +
+            1
         ).padStart(
             2,
             "0"
@@ -2984,7 +2976,6 @@ function getTodayForInput() {
 // =========================
 
 async function migrateOldEntries() {
-
     const oldSavedEntries =
         localStorage.getItem(
             "plannerEntries"
@@ -2993,14 +2984,12 @@ async function migrateOldEntries() {
     if (
         !oldSavedEntries
     ) {
-
         return;
     }
 
     let oldEntries;
 
     try {
-
         oldEntries =
             JSON.parse(
                 oldSavedEntries
@@ -3009,7 +2998,6 @@ async function migrateOldEntries() {
     } catch (
         error
     ) {
-
         console.error(
             "Could not read old localStorage entries:",
             error
@@ -3023,9 +3011,10 @@ async function migrateOldEntries() {
             oldEntries
         )
         ||
-        oldEntries.length === 0
+        oldEntries.length
+        ===
+        0
     ) {
-
         return;
     }
 
@@ -3052,9 +3041,10 @@ async function migrateOldEntries() {
     if (
         countError
         ||
-        count > 0
+        count
+        >
+        0
     ) {
-
         return;
     }
 
@@ -3102,7 +3092,6 @@ async function migrateOldEntries() {
     if (
         error
     ) {
-
         console.error(
             "Could not migrate old entries:",
             error
@@ -3122,7 +3111,6 @@ async function migrateOldEntries() {
 // =========================
 
 async function startApp() {
-
     showGreeting();
 
     showCurrentDate();

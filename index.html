@@ -1,22 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>  
+<head>
     <link rel="manifest" href="manifest.json">
 
     <meta name="theme-color" content="#ffffff">
-
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Planner">
 
     <link rel="apple-touch-icon" href="icons/planner-192.png">
-
-    <link
-        rel="icon"
-        type="image/png"
-        href="icons/planner-192.png"
-    >
+    <link rel="icon" type="image/png" href="icons/planner-192.png">
 
     <meta charset="UTF-8">
 
@@ -27,25 +22,23 @@
 
     <title>School Planner</title>
 
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
+    <link rel="stylesheet" href="style.css">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" defer></script>
     <script src="script.js" defer></script>
-
-    <script
-        src="notifications.js"
-        defer
-    ></script>
-
+    <script src="notifications.js" defer></script>
 </head>
-
 
 <body>
 
+    <!-- Initial cloud loading screen -->
+    <div id="app-loading-screen" class="loading-screen">
+        <div class="loading-card">
+            <div class="loading-spinner"></div>
+            <p>Loading your planner…</p>
+        </div>
+    </div>
 
     <main class="planner" id="planner">
 
@@ -56,28 +49,31 @@
         <header class="planner-header">
 
             <div class="header-left">
-
-                <h1>School Planner</h1>
+                <h1 id="greeting-text">Welcome, Ethan</h1>
 
                 <p id="current-date">
                     DATE HERE
                 </p>
-
             </div>
 
-            <button
-                id="enable-notifications-button"
-                type="button"
-            >
-                Enable Notifications
-            </button>
+            <div class="header-actions">
 
-            <button
-                id="new-entry-button"
-                type="button"
-            >
-                New Entry
-            </button>
+                <!-- Notifications intentionally left as-is -->
+                <button
+                    id="enable-notifications-button"
+                    type="button"
+                >
+                    Enable Notifications
+                </button>
+
+                <button
+                    id="new-entry-button"
+                    type="button"
+                >
+                    New Entry
+                </button>
+
+            </div>
 
         </header>
 
@@ -89,66 +85,53 @@
         <section class="summary">
 
             <p class="summary-text">
-
                 You have
-
-                <span id="assignment-count">
-                    0
-                </span>
-
+                <span id="assignment-count">0</span>
                 assignments to complete
-
             </p>
 
-
             <p class="summary-text">
-
                 You have
-
-                <span id="exam-count">
-                    0
-                </span>
-
-                exams coming up
-
+                <span id="exam-count">0</span>
+                exams/quizzes coming up
             </p>
 
         </section>
 
 
         <!-- =========================
-             DUE
+             ASSIGNMENTS
         ========================== -->
 
-        <section class="due-section">
+        <section
+            class="planner-section"
+            id="assignments-section"
+        >
 
-            <h2>Due</h2>
-
-
-            <!-- TODAY + TOMORROW -->
-
-            <div id="due-soon-section">
-
-                <div class="due-soon-header">
-                    <p>Due Soon</p>
-                </div>
-
-                <div id="due-soon-list"></div>
-
+            <div class="section-title-row">
+                <h2>Assignments</h2>
             </div>
 
+            <div id="assignment-groups"></div>
 
-            <!-- UPCOMING -->
+        </section>
 
-            <div
-                id="upcoming-header"
-                class="upcoming-header"
-            >
-                Upcoming
+
+        <!-- =========================
+             EXAMS + QUIZZES
+        ========================== -->
+
+        <section
+            class="planner-section"
+            id="assessments-section"
+            hidden
+        >
+
+            <div class="section-title-row">
+                <h2>Exams &amp; Quizzes</h2>
             </div>
 
-
-            <div id="entry-list"></div>
+            <div id="assessment-groups"></div>
 
         </section>
 
@@ -184,7 +167,7 @@
 
 
     <!-- =========================
-         NEW ENTRY DIALOG
+         ADD / EDIT ENTRY DIALOG
     ========================== -->
 
     <dialog id="new-entry-dialog">
@@ -193,15 +176,15 @@
 
             <div class="form-header">
 
-                <h2>
+                <h2 id="entry-dialog-title">
                     New Entry
                 </h2>
-
 
                 <button
                     type="button"
                     id="close-entry-button"
                     class="close-button"
+                    aria-label="Close"
                 >
                     ×
                 </button>
@@ -217,59 +200,147 @@
                 type="text"
                 id="entry-name"
                 placeholder="Enter name here"
+                autocomplete="off"
                 required
             >
 
 
-            <label for="entry-subject">
+            <label>
                 Subject
             </label>
 
-            <select
+            <input
+                type="hidden"
                 id="entry-subject"
-                required
-            ></select>
-
-
-            <label for="entry-type">
-                Type
-            </label>
-
-            <select
-                id="entry-type"
                 required
             >
 
-                <option value="assignment">
+            <div
+                id="subject-options"
+                class="choice-grid subject-choice-grid"
+            ></div>
+
+
+            <label>
+                Type
+            </label>
+
+            <input
+                type="hidden"
+                id="entry-type"
+                value="assignment"
+                required
+            >
+
+            <div
+                id="type-options"
+                class="choice-grid type-choice-grid"
+            >
+
+                <button
+                    type="button"
+                    class="choice-button type-choice"
+                    data-value="assignment"
+                    style="--choice-color: #2563eb;"
+                >
                     Assignment
-                </option>
+                </button>
 
-                <option value="exam">
+                <button
+                    type="button"
+                    class="choice-button type-choice"
+                    data-value="exam"
+                    style="--choice-color: #ea580c;"
+                >
                     Exam
-                </option>
+                </button>
 
-            </select>
+                <button
+                    type="button"
+                    class="choice-button type-choice"
+                    data-value="quiz"
+                    style="--choice-color: #7c3aed;"
+                >
+                    Quiz
+                </button>
+
+            </div>
 
 
             <label for="entry-due-date">
                 Due Date
             </label>
 
-            <input
-                type="date"
-                id="entry-due-date"
-                required
-            >
+            <div class="date-input-row">
+
+                <input
+                    type="date"
+                    id="entry-due-date"
+                >
+
+                <button
+                    type="button"
+                    id="no-due-date-button"
+                    class="no-due-date-button"
+                >
+                    No due date
+                </button>
+
+            </div>
 
 
             <button
                 type="submit"
                 class="add-entry-button"
+                id="save-entry-button"
             >
-                Add Entry
+                <span class="button-spinner" aria-hidden="true"></span>
+                <span id="save-entry-button-text">Add Entry</span>
             </button>
 
         </form>
+
+    </dialog>
+
+
+    <!-- =========================
+         SWIPE ACTIONS
+    ========================== -->
+
+    <dialog id="entry-actions-dialog" class="actions-dialog">
+
+        <div class="actions-card">
+
+            <p
+                id="actions-entry-name"
+                class="actions-entry-name"
+            ></p>
+
+            <button
+                type="button"
+                id="edit-entry-button"
+                class="action-button"
+            >
+                Edit
+            </button>
+
+            <button
+                type="button"
+                id="delete-entry-button"
+                class="action-button delete-action-button"
+            >
+                Delete
+            </button>
+
+            <button
+                type="button"
+                id="cancel-entry-actions-button"
+                class="action-button cancel-action-button"
+            >
+                Cancel
+            </button>
+
+        </div>
 
     </dialog>
 

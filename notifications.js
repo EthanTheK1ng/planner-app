@@ -2,18 +2,21 @@
 // NOTIFICATIONS
 // =========================
 
-const VAPID_PUBLIC_KEY =
-    "PASTE_YOUR_VAPID_PUBLIC_KEY_HERE";
-
-
 const REGISTER_PUSH_URL =
     "https://edcmnuriwutqxprzhkhz.supabase.co/functions/v1/register-push";
+
+const VAPID_PUBLIC_KEY_URL =
+    "https://edcmnuriwutqxprzhkhz.supabase.co/functions/v1/get-vapid-public-key";
 
 
 const notificationButton =
     document.getElementById(
         "enable-notifications-button"
     );
+
+
+let cachedVapidPublicKey =
+    null;
 
 
 // =========================
@@ -23,7 +26,6 @@ const notificationButton =
 function urlBase64ToUint8Array(
     base64String
 ) {
-
     const padding =
         "=".repeat(
             (
@@ -34,7 +36,6 @@ function urlBase64ToUint8Array(
             %
             4
         );
-
 
     const base64 =
         (
@@ -51,21 +52,125 @@ function urlBase64ToUint8Array(
                 "/"
             );
 
-
     const rawData =
         window.atob(
             base64
         );
 
+    const outputArray =
+        new Uint8Array(
+            rawData.length
+        );
 
-    return Uint8Array.from(
-        [
-            ...rawData
-        ].map(
-            character =>
-                character.charCodeAt(0)
-        )
-    );
+    for (
+        let i = 0;
+        i < rawData.length;
+        i++
+    ) {
+        outputArray[i] =
+            rawData.charCodeAt(
+                i
+            );
+    }
+
+    return outputArray;
+}
+
+
+// =========================
+// GET VAPID PUBLIC KEY
+// =========================
+
+async function getVapidPublicKey() {
+    if (
+        cachedVapidPublicKey
+    ) {
+        return cachedVapidPublicKey;
+    }
+
+    const response =
+        await fetch(
+            VAPID_PUBLIC_KEY_URL,
+            {
+                method:
+                    "GET",
+
+                cache:
+                    "no-cache"
+            }
+        );
+
+    if (
+        !response.ok
+    ) {
+        const message =
+            await response.text();
+
+        console.error(
+            "Could not get VAPID public key:",
+            message
+        );
+
+        throw new Error(
+            "Could not load the notification public key."
+        );
+    }
+
+    const data =
+        await response.json();
+
+    if (
+        !data.publicKey
+        ||
+        typeof data.publicKey
+        !==
+        "string"
+    ) {
+        throw new Error(
+            "The notification public key response was invalid."
+        );
+    }
+
+    const keyBytes =
+        urlBase64ToUint8Array(
+            data.publicKey
+        );
+
+    /*
+        A normal uncompressed P-256
+        VAPID public key is 65 bytes
+        and starts with 0x04.
+    */
+
+    if (
+        keyBytes.length
+        !==
+        65
+        ||
+        keyBytes[0]
+        !==
+        4
+    ) {
+        console.error(
+            "Invalid VAPID key:",
+            {
+                length:
+                    keyBytes.length,
+
+                firstByte:
+                    keyBytes[0]
+            }
+        );
+
+        throw new Error(
+            "The notification public key was not valid."
+        );
+    }
+
+    cachedVapidPublicKey =
+        data.publicKey;
+
+    return cachedVapidPublicKey;
 }
 
 
@@ -74,7 +179,6 @@ function urlBase64ToUint8Array(
 // =========================
 
 function isIOS() {
-
     return (
         /iPad|iPhone|iPod/
             .test(
@@ -95,7 +199,6 @@ function isIOS() {
 
 
 function isStandalone() {
-
     return (
         window.matchMedia(
             "(display-mode: standalone)"
@@ -114,7 +217,6 @@ function isStandalone() {
 // =========================
 
 async function registerServiceWorker() {
-
     if (
         !(
             "serviceWorker"
@@ -122,18 +224,133 @@ async function registerServiceWorker() {
             navigator
         )
     ) {
-
         throw new Error(
             "Service workers are not supported."
         );
     }
 
+    const registration =
+        await navigator
+            .serviceWorker
+            .register(
+                "./sw.js",
+                {
+                    updateViaCache:
+                        "none"
+                }
+            );
 
-    return await navigator
-        .serviceWorker
-        .register(
-            "./sw.js"
+    try {
+        await registration.update();
+
+    } catch (
+        error
+    ) {
+        console.warn(
+            "Could not force service worker update:",
+            error
         );
+    }
+
+    return registration;
+}
+
+
+// =========================
+// BUTTON STATE
+// =========================
+
+function setNotificationButtonState(
+    state
+) {
+    if (
+        !notificationButton
+    ) {
+        return;
+    }
+
+    if (
+        state
+        ===
+        "unsupported"
+    ) {
+        notificationButton.textContent =
+            "Notifications Unsupported";
+
+        notificationButton.disabled =
+            true;
+
+        notificationButton.title =
+            "Notifications unsupported";
+
+        notificationButton.setAttribute(
+            "aria-label",
+            "Notifications unsupported"
+        );
+
+        return;
+    }
+
+
+    if (
+        state
+        ===
+        "enabled"
+    ) {
+        notificationButton.textContent =
+            "Notifications Enabled";
+
+        notificationButton.disabled =
+            true;
+
+        notificationButton.title =
+            "Notifications enabled";
+
+        notificationButton.setAttribute(
+            "aria-label",
+            "Notifications enabled"
+        );
+
+        return;
+    }
+
+
+    if (
+        state
+        ===
+        "loading"
+    ) {
+        notificationButton.textContent =
+            "Enabling Notifications";
+
+        notificationButton.disabled =
+            true;
+
+        notificationButton.title =
+            "Enabling notifications";
+
+        notificationButton.setAttribute(
+            "aria-label",
+            "Enabling notifications"
+        );
+
+        return;
+    }
+
+
+    notificationButton.textContent =
+        "Enable Notifications";
+
+    notificationButton.disabled =
+        false;
+
+    notificationButton.title =
+        "Enable notifications";
+
+    notificationButton.setAttribute(
+        "aria-label",
+        "Enable notifications"
+    );
 }
 
 
@@ -142,14 +359,11 @@ async function registerServiceWorker() {
 // =========================
 
 async function updateNotificationButton() {
-
     if (
         !notificationButton
     ) {
-
         return;
     }
-
 
     if (
         !(
@@ -170,95 +384,120 @@ async function updateNotificationButton() {
             window
         )
     ) {
-
-        notificationButton
-            .textContent =
-            "Notifications Unsupported";
-
-        notificationButton
-            .disabled =
-            true;
+        setNotificationButtonState(
+            "unsupported"
+        );
 
         return;
     }
 
-
-    // If permission has not been granted,
-    // they still need to enable notifications.
 
     if (
         Notification.permission
         !==
         "granted"
     ) {
-
-        notificationButton
-            .textContent =
-            "Enable Notifications";
-
-        notificationButton
-            .disabled =
-            false;
+        setNotificationButtonState(
+            "available"
+        );
 
         return;
     }
 
 
     try {
-
         const registration =
             await navigator
                 .serviceWorker
                 .ready;
-
 
         const subscription =
             await registration
                 .pushManager
                 .getSubscription();
 
-
         if (
             subscription
         ) {
-
-            notificationButton
-                .textContent =
-                "Notifications Enabled";
-
-            notificationButton
-                .disabled =
-                true;
+            setNotificationButtonState(
+                "enabled"
+            );
 
         } else {
-
-            notificationButton
-                .textContent =
-                "Enable Notifications";
-
-            notificationButton
-                .disabled =
-                false;
+            setNotificationButtonState(
+                "available"
+            );
         }
 
     } catch (
         error
     ) {
-
         console.error(
             "Could not check notification status:",
             error
         );
 
-
-        notificationButton
-            .textContent =
-            "Enable Notifications";
-
-        notificationButton
-            .disabled =
-            false;
+        setNotificationButtonState(
+            "available"
+        );
     }
+}
+
+
+// =========================
+// REGISTER SUBSCRIPTION
+// =========================
+
+async function registerSubscriptionWithServer(
+    subscription,
+    pin
+) {
+    const response =
+        await fetch(
+            REGISTER_PUSH_URL,
+            {
+                method:
+                    "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json",
+
+                    "x-notification-pin":
+                        pin
+                },
+
+                body:
+                    JSON.stringify(
+                        {
+                            subscription:
+                                subscription
+                                    .toJSON(),
+
+                            deviceName:
+                                navigator.userAgent
+                        }
+                    )
+            }
+        );
+
+    if (
+        !response.ok
+    ) {
+        const message =
+            await response.text();
+
+        console.error(
+            "Push registration failed:",
+            message
+        );
+
+        throw new Error(
+            "Could not register this device."
+        );
+    }
+
+    return true;
 }
 
 
@@ -267,13 +506,10 @@ async function updateNotificationButton() {
 // =========================
 
 async function enableNotifications() {
-
     try {
-
         if (
             !window.isSecureContext
         ) {
-
             alert(
                 "Notifications require HTTPS."
             );
@@ -287,7 +523,6 @@ async function enableNotifications() {
             &&
             !isStandalone()
         ) {
-
             alert(
                 "On iPhone, first add the Planner to your Home Screen. Then open it from the Home Screen and enable notifications."
             );
@@ -308,14 +543,24 @@ async function enableNotifications() {
                 in
                 window
             )
+            ||
+            !(
+                "serviceWorker"
+                in
+                navigator
+            )
         ) {
-
             alert(
                 "This browser does not support Web Push notifications."
             );
 
             return;
         }
+
+
+        setNotificationButtonState(
+            "loading"
+        );
 
 
         const permission =
@@ -328,6 +573,9 @@ async function enableNotifications() {
             !==
             "granted"
         ) {
+            setNotificationButtonState(
+                "available"
+            );
 
             alert(
                 "Notifications were not allowed."
@@ -352,21 +600,34 @@ async function enableNotifications() {
                 .getSubscription();
 
 
-        // Already subscribed?
-        // Then there is nothing else to do.
+        /*
+            If this browser already has a
+            subscription, don't create another.
+        */
 
         if (
             subscription
         ) {
-
             await updateNotificationButton();
 
             return;
         }
 
 
-        // Create a subscription only if one
-        // does not already exist.
+        /*
+            Get the SAME public key that belongs
+            to your existing VAPID private key.
+        */
+
+        const vapidPublicKey =
+            await getVapidPublicKey();
+
+
+        const applicationServerKey =
+            urlBase64ToUint8Array(
+                vapidPublicKey
+            );
+
 
         subscription =
             await registration
@@ -377,15 +638,15 @@ async function enableNotifications() {
                             true,
 
                         applicationServerKey:
-                            urlBase64ToUint8Array(
-                                VAPID_PUBLIC_KEY
-                            )
+                            applicationServerKey
                     }
                 );
 
 
-        // Only ask for the PIN when registering
-        // a brand-new device.
+        /*
+            Ask for the PIN only when this is
+            actually a new browser/device.
+        */
 
         const pin =
             prompt(
@@ -393,62 +654,54 @@ async function enableNotifications() {
             );
 
 
+        /*
+            If they cancel, remove the new local
+            subscription so clicking again works
+            normally instead of getting stuck.
+        */
+
         if (
             !pin
         ) {
+            await subscription.unsubscribe();
+
+            setNotificationButtonState(
+                "available"
+            );
 
             return;
         }
 
 
-        const response =
-            await fetch(
-                REGISTER_PUSH_URL,
-                {
-                    method:
-                        "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-
-                        "x-notification-pin":
-                            pin
-                    },
-
-                    body:
-                        JSON.stringify(
-                            {
-                                subscription:
-                                    subscription
-                                        .toJSON(),
-
-                                deviceName:
-                                    navigator.userAgent
-                            }
-                        )
-                }
+        try {
+            await registerSubscriptionWithServer(
+                subscription,
+                pin
             );
 
-
-        if (
-            !response.ok
+        } catch (
+            error
         ) {
+            /*
+                If registration fails, delete the
+                browser subscription so you can
+                immediately retry with the correct
+                PIN.
+            */
 
-            const message =
-                await response.text();
+            try {
+                await subscription.unsubscribe();
 
+            } catch (
+                unsubscribeError
+            ) {
+                console.error(
+                    "Could not remove failed subscription:",
+                    unsubscribeError
+                );
+            }
 
-            console.error(
-                message
-            );
-
-
-            alert(
-                "Could not register notifications. Check your PIN."
-            );
-
-            return;
+            throw error;
         }
 
 
@@ -462,12 +715,14 @@ async function enableNotifications() {
     } catch (
         error
     ) {
-
         console.error(
             "Notification setup failed:",
             error
         );
 
+        setNotificationButtonState(
+            "available"
+        );
 
         alert(
             "Notification setup failed. Check the console."
@@ -492,9 +747,7 @@ notificationButton
 // =========================
 
 async function startNotifications() {
-
     try {
-
         await registerServiceWorker();
 
         await navigator
@@ -506,10 +759,13 @@ async function startNotifications() {
     } catch (
         error
     ) {
-
         console.error(
             "Notification startup failed:",
             error
+        );
+
+        setNotificationButtonState(
+            "available"
         );
     }
 }

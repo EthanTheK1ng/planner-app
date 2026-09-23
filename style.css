@@ -211,13 +211,24 @@ input {
 }
 
 #enable-notifications-button::before {
-    content: "🔔";
+    content: "";
 
     display: block;
 
-    font-size: 17px;
+    width: 18px;
+    height: 18px;
 
-    line-height: 1;
+    background-image:
+        url("icons/notification.png");
+
+    background-size:
+        contain;
+
+    background-repeat:
+        no-repeat;
+
+    background-position:
+        center;
 }
 
 #enable-notifications-button:hover {
